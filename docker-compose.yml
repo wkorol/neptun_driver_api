@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neptun_api
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8000:80"
+    environment:
+      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"

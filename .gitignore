@@ -1,0 +1,62 @@
+# .env file (personal configuration)
+.env
+.env.local
+.env.*.local
+
+# .env files in the test environment
+.env.test
+.env.test.local
+
+# Symfony directories
+/var/
+/vendor/
+
+# Cache and logs
+**/var/cache/*
+**/var/log/*
+/var/sessions/
+
+# Local environment files
+/.idea/
+/.vscode/
+.phpunit.result.cache
+*.iml
+
+# Composer files
+composer.lock
+
+# Node modules and front-end dependencies
+/node_modules/
+/public/build/
+/public/bundles/
+
+# Cache for specific tools
+/.phpunit.result.cache
+
+# Ignore Mac system files
+.DS_Store
+
+# Ignore Linux system files
+*.swp
+
+# Ignore coverage results
+/coverage/
+
+# Docker and CI configuration (optional)
+.docker/
+.dockerignore
+docker-compose.override.yml
+phpunit.xml
+phpunit.xml.dist
+phpstan.neon
+phpstan.neon.dist
+phpstan-baseline.neon
+
+# Ignore IDE specific settings
+/.idea/
+/.vscode/
+
+# Ignore test result cache
+.phpunit.result.cache
+phpunit.result.cache
+

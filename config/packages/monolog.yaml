@@ -46,8 +46,12 @@ when@prod:
                 handler: nested
                 excluded_http_codes: [404, 405]
                 buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+                channels: ["!deprecation"] # Exclude deprecation messages
+
             nested:
                 type: stream
-                path: '%kernel.logs_dir%/prod.log'  # Change path here
+                path: '%kernel.logs_dir%/prod.log'  # Path for main logs
                 level: debug
                 formatter: monolog.formatter.json
+                channels: ["!deprecation"] # Exclude deprecation messages
+

@@ -24,6 +24,12 @@ jobs:
       - name: Rename .env.prod to .env
         run: mv .env.prod .env
 
+      - name: Create JWT directory
+        run: mkdir -p config/jwt
+
+      - name: Set permissions for JWT directory
+        run: chmod -R 700 config/jwt
+
       - name: Generate JWT key
         run: php bin/console lexik:jwt:generate-keypair --overwrite
 

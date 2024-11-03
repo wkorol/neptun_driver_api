@@ -33,8 +33,20 @@ RUN mkdir -p var/cache var/log config/jwt && \
     chown -R www-data:www-data var config/jwt && \
     chmod -R 775 var config/jwt
 
+# Set permissions for /tmp
+RUN chmod -R 1777 /tmp
+
+# Switch to www-data to ensure the correct user permissions
+USER www-data
+
 # Generate JWT keys
 RUN php bin/console lexik:jwt:generate-keypair --overwrite
+
+# Clear cache
+RUN php bin/console cache:clear
+
+# Revert back to root to start Apache
+USER root
 
 # Start Apache in the foreground
 CMD ["apache2-foreground"]

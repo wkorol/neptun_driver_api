@@ -30,7 +30,8 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 # Create necessary directories and set permissions
 RUN mkdir -p var/cache var/log config/jwt && \
-    chown -R www-data:www-data var config/jwt
+    chown -R www-data:www-data var config/jwt && \
+    chmod -R 775 var config/jwt
 
 # Generate JWT keys
 RUN php bin/console lexik:jwt:generate-keypair --overwrite

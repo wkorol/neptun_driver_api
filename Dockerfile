@@ -45,6 +45,9 @@ RUN php bin/console lexik:jwt:generate-keypair --overwrite
 # Clear cache
 RUN php bin/console cache:clear
 
+# Run database migrations
+RUN php bin/console doctrine:migrations:migrate --no-interaction
+
 # Revert back to root to start Apache
 USER root
 

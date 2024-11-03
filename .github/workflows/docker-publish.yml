@@ -24,6 +24,9 @@ jobs:
       - name: Rename .env.prod to .env
         run: mv .env.prod .env
 
+      - name: Generate JWT key
+        run: php bin/console lexik:jwt:generate-keypair --overwrite
+
       - name: Build Docker Image
         run: docker build -t ghcr.io/wkorol/neptun_driver_api:latest .
 

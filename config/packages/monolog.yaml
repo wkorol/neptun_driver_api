@@ -51,8 +51,3 @@ when@prod:
                 path: '%kernel.logs_dir%/prod.log'  # Change path here
                 level: debug
                 formatter: monolog.formatter.json
-            deprecation:
-                type: stream
-                channels: [ deprecation ]
-                path: '%kernel.logs_dir%/deprecations.log'  # Change path here
-                formatter: monolog.formatter.json

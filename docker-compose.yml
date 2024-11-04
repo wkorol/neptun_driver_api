@@ -8,7 +8,11 @@ services:
     container_name: neptun_api
     volumes:
       - ./:/var/www/html
+      - sqlite-db:/var/www/html/var  # Use named volume for SQLite database
     ports:
       - "8000:80"
     environment:
-      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
+      DATABASE_URL: "sqlite:///var/data.db"  # Update to match the volume path
+
+volumes:
+  sqlite-db:

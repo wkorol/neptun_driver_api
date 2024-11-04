@@ -7,6 +7,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget sqlite3 libsqlite3-dev git bash libpq-dev libzip-dev unzip libxml2-dev \
     && docker-php-ext-install pdo pdo_sqlite opcache zip soap intl
 
+# Install Cron
+RUN apt-get -y install cron
+
 # Enable Apache modules
 RUN a2enmod rewrite ssl socache_shmcb
 
@@ -51,5 +54,10 @@ RUN php bin/console doctrine:migrations:migrate --no-interaction
 # Revert back to root to start Apache
 USER root
 
-# Start Apache in the foreground
-CMD ["apache2-foreground"]
+# Add your cron job
+COPY cronjob /etc/cron.d/my-cron-job
+RUN chmod 0644 /etc/cron.d/my-cron-job
+RUN crontab /etc/cron.d/my-cron-job
+
+# Start the cron service and Apache in the foreground
+CMD cron && apache2-foreground

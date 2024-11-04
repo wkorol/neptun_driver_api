@@ -1,15 +1,15 @@
 #!/bin/bash
 # entrypoint.sh
 
-# Set ownership of the var directory to avoid permission issues
-chown -R www-data:www-data /var/www/html/var
+# Set ownership for var and log directories
+chown -R www-data:www-data /var/www/html/var /var/www/html/var/log
 
-# Ensure the JWT directory exists and has correct permissions
+# Ensure the JWT directory exists and set permissions
 mkdir -p /var/www/html/config/jwt
 chown -R www-data:www-data /var/www/html/config/jwt
 chmod -R 770 /var/www/html/config/jwt
 
-# Ensure JWT keys exist, generate if missing
+# Generate JWT keys if they don’t exist
 if [ ! -f /var/www/html/config/jwt/private.pem ] || [ ! -f /var/www/html/config/jwt/public.pem ]; then
     php bin/console lexik:jwt:generate-keypair --overwrite
 fi

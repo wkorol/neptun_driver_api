@@ -48,12 +48,6 @@ RUN chmod -R 775 /var/www/html/var/log
 # Set permissions for /tmp
 RUN chmod -R 1777 /tmp
 
-# Switch to www-data to ensure the correct user permissions
-USER www-data
-
-# Revert back to root to start Apache
-USER root
-
 # Add your cron job
 COPY cronjob /etc/cron.d/my-cron-job
 RUN chmod 0644 /etc/cron.d/my-cron-job

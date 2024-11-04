@@ -28,7 +28,7 @@ RUN echo "ServerName neptun-api" >> /etc/apache2/conf-available/servername.conf 
 RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
 # Create necessary directories and set permissions during build
-RUN mkdir -p /var/www/html/var /var/www/html/config/jwt /var/www/html/var/log && \
+RUN mkdir -p /var/www/html/var /var/www/html/var/cache /var/www/html/config/jwt /var/www/html/var/log && \
     chown -R www-data:www-data /var/www/html/var /var/www/html/config/jwt && \
     chmod -R 770 /var/www/html/var /var/www/html/config/jwt
 

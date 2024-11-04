@@ -2,7 +2,7 @@
 # entrypoint.sh
 
 # Set ownership for var and log directories
-chown -R www-data:www-data /var/www/html/var /var/www/html/var/log /var/www/html/var/cache
+chown -R www-data:www-data /var/www/html/var /var/www/html/var/log /var/www/html/var/cache 
 
 # Ensure the JWT directory exists and set permissions
 mkdir -p /var/www/html/config/jwt

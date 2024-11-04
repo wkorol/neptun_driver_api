@@ -31,6 +31,10 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+RUN mkdir -p /var/www/html/config/jwt && \
+    chown -R www-data:www-data /var/www/html/config/jwt && \
+    chmod -R 770 /var/www/html/config/jwt
+
 # Set entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

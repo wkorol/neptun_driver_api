@@ -31,9 +31,19 @@ RUN echo "ServerName neptun-api" >> /etc/apache2/conf-available/servername.conf 
 # Install PHP dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
-RUN mkdir -p var/cache var/log config/jwt && \
-    chown -R www-data:www-data /var/www/html/var /var/www/html/config/jwt && \
-    chmod -R 775 /var/www/html/var /var/www/html/config/jwt
+RUN mkdir -p var/cache var/log config/jwt
+
+# Set ownership for each directory separately to avoid permission issues
+RUN chown -R www-data:www-data /var/www/html/var
+RUN chown -R www-data:www-data /var/www/html/config/jwt
+RUN chown -R www-data:www-data /var/www/html/var/cache
+RUN chown -R www-data:www-data /var/www/html/var/log
+
+# Set permissions for each directory separately
+RUN chmod -R 775 /var/www/html/var
+RUN chmod -R 775 /var/www/html/config/jwt
+RUN chmod -R 775 /var/www/html/var/cache
+RUN chmod -R 775 /var/www/html/var/log
 
 # Set permissions for /tmp
 RUN chmod -R 1777 /tmp

@@ -2,17 +2,23 @@ version: '3.8'
 
 services:
   php:
+    depends_on:
+      - db
     build:
       context: .
       dockerfile: Dockerfile
     container_name: neptun_api
     volumes:
       - ./:/var/www/html
-      - sqlite-db:/var/www/html/var  # Use named volume for SQLite database
     ports:
       - "8000:80"
+  db:
+    image: mysql:8.0
+    container_name: neptun_db_local
     environment:
-      DATABASE_URL: "sqlite:///var/data.db"  # Update to match the volume path
-
-volumes:
-  sqlite-db:
+      MYSQL_DATABASE: neptun_local
+      MYSQL_ROOT_PASSWORD: rootpassword  # Set root password only
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/lib/mysql  # Use an anonymous volume for MySQL data

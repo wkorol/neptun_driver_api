@@ -4,8 +4,8 @@ FROM php:8.3-apache-bookworm
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install necessary packages and PHP extensions
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget sqlite3 libsqlite3-dev git bash libpq-dev libzip-dev unzip libxml2-dev \
-    && docker-php-ext-install pdo pdo_sqlite opcache zip soap intl
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget libpq-dev libzip-dev unzip libxml2-dev git bash \
+    && docker-php-ext-install pdo pdo_mysql opcache zip soap intl
 
 # Install Cron
 RUN apt-get -y install cron
@@ -42,15 +42,6 @@ RUN chmod -R 1777 /tmp
 # Switch to www-data to ensure the correct user permissions
 USER www-data
 
-# Generate JWT keys
-RUN php bin/console lexik:jwt:generate-keypair --overwrite
-
-# Clear cache
-RUN php bin/console cache:clear
-
-# Run database migrations
-RUN php bin/console doctrine:migrations:migrate --no-interaction
-
 # Revert back to root to start Apache
 USER root
 
@@ -59,5 +50,8 @@ COPY cronjob /etc/cron.d/my-cron-job
 RUN chmod 0644 /etc/cron.d/my-cron-job
 RUN crontab /etc/cron.d/my-cron-job
 
-# Start the cron service and Apache in the foreground
-CMD cron && apache2-foreground
+# Combine all runtime commands in CMD
+CMD php bin/console lexik:jwt:generate-keypair --overwrite && \
+    php bin/console cache:clear && \
+    php bin/console doctrine:migrations:migrate --no-interaction && \
+    cron && apache2-foreground

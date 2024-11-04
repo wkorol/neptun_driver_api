@@ -27,6 +27,10 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ghcr.io/wkorol/neptun_driver_api:latest .
 
+      - name: Set ownership for var folder
+        run: docker run --rm -v "$(pwd)":/app ghcr.io/wkorol/neptun_driver_api:latest \
+             chown -R www-data:www-data /app/var
+
       - name: Push to GitHub Container Registry
         run: docker push ghcr.io/wkorol/neptun_driver_api:latest
 

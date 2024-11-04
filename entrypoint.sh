@@ -3,6 +3,7 @@
 
 # Set ownership of the var directory to avoid permission issues
 chown -R www-data:www-data /var/www/html/var
+chown -R www-data:www-data /var
 
 # Ensure JWT keys exist, generate if missing
 if [ ! -f /var/www/html/config/jwt/private.pem ] || [ ! -f /var/www/html/config/jwt/public.pem ]; then

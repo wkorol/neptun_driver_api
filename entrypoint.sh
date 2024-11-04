@@ -2,7 +2,7 @@
 # entrypoint.sh
 
 # Set ownership and permissions for var and cache directories
-mkdir -p /var/www/html/var/cache/prod /var/www/html/var/log
+mkdir -p /var/www/html/var /var/www/html/var/cache /var/www/html/var/cache/prod /var/www/html/config/jwt /var/www/html/var/log
 chown -R www-data:www-data /var/www/html/var /var/www/html/var/cache /var/www/html/var/log
 chmod -R 770 /var/www/html/var /var/www/html/var/cache /var/www/html/var/log
 

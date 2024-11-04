@@ -34,7 +34,6 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 RUN mkdir -p var/cache var/log config/jwt
 
 # Set ownership for each directory separately to avoid permission issues
-RUN chmod -R 777 /var/www/html/var
 RUN chown -R www-data:www-data var/
 # Set permissions for /tmp
 RUN chmod -R 1777 /tmp

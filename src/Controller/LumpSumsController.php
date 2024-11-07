@@ -25,7 +25,7 @@ class LumpSumsController extends AbstractController
     }
 
     #[Route('/lump_sums/add', name: 'add_lump_sums', methods: ['POST'])]
-    public function addFixedPrices(Request $request): JsonResponse
+    public function addLumpSums(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 

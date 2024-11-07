@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
-class LumpSums
+class LumpSums implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -38,5 +38,14 @@ class LumpSums
     public function getFixedValues(): array
     {
         return $this->fixedValues;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+          'id' => $this->id,
+          'name' => $this->name,
+          'fixedValues' => $this->fixedValues,
+        ];
     }
 }

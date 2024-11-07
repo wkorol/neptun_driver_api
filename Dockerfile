@@ -44,5 +44,14 @@ RUN chmod 0644 /etc/cron.d/symfony-cron
 # Apply the cron job
 RUN crontab /etc/cron.d/symfony-cron
 
+# Copy the entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set the custom entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 # Start Supervisor, which will manage both Apache and cron
 CMD cron && apache2-foreground

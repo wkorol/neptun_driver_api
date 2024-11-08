@@ -25,6 +25,13 @@ class RegionRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
+    public function removeRegion(int $id): void
+    {
+        $region = $this->findOneBy(['id' => $id]);
+        $this->getEntityManager()->remove($region);
+        $this->getEntityManager()->flush();
+    }
+
     public function getHotelsByRegion(int $id): array
     {
         return $this->createQueryBuilder('r')
@@ -38,6 +45,14 @@ class RegionRepository extends ServiceEntityRepository
             ->getArrayResult();
     }
 
+    public function editRegion(int $id, mixed $data): void
+    {
+        $region = $this->findOneBy(['id' => $id]);
+        if ($region) {
+            $region->setName($data['name']);
+        }
+        $this->getEntityManager()->flush();
+    }
 
 
 }

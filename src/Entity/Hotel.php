@@ -18,11 +18,11 @@ class Hotel implements \JsonSerializable
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'hotels')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', nullable: true, onDelete: null)]
     private ?Region $region = null;
 
     #[ORM\ManyToOne(inversedBy: 'hotels')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', nullable: true, onDelete: null)]
     private ?LumpSums $lump_sums = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]

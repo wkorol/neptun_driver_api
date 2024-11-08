@@ -57,4 +57,19 @@ class RegionController extends AbstractController
             ]
         ], Response::HTTP_CREATED);
     }
+
+    #[Route('/region/{id}/edit', name: 'edit_region', methods: ['PUT'])]
+    public function editRegion(Request $request, int $id): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $this->regionRepository->editRegion($id, $data);
+        return $this->json(['message' => 'Region edited successfully'], Response::HTTP_OK);
+    }
+
+    #[Route('/region/{id}/delete', name: 'remove_region', methods: ['DELETE'])]
+    public function removeRegion(int $id): JsonResponse
+    {
+        $this->regionRepository->removeRegion($id);
+        return $this->json(['message' => 'Region with id '. $id . 'has been removed'], Response::HTTP_OK);
+    }
 }

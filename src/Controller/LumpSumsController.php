@@ -11,10 +11,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 class LumpSumsController extends AbstractController
 {
-    public function __construct(private LumpSumsRepository $lumpSumsRepository)
+    public function __construct(private readonly LumpSumsRepository $lumpSumsRepository)
     {
     }
 
@@ -55,4 +56,42 @@ class LumpSumsController extends AbstractController
             'message' => 'Added new Lump Sums'
         ]);
     }
+
+    #[Route('/lump_sums/{id}/delete', name: 'remove_lump_sums', methods: ['DELETE'])]
+    public function removeRegion(Uuid $id): JsonResponse
+    {
+        $this->lumpSumsRepository->removeLumpSums($id);
+        return $this->json(['message' => 'Lump sums with id '. $id . ' removed'], Response::HTTP_OK);
+    }
+
+    #[Route('/lump_sums/{id}/edit', name: 'edit_lump_sums', methods: ['PUT'])]
+    public function editLumpSums(Uuid $id, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Validate the input data
+        if (!$data || !isset($data['name'], $data['fixedValues'])) {
+            return $this->json([
+                'message' => 'Invalid JSON data or missing fields'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Find the existing LumpSums entity
+        $existingLumpSum = $this->lumpSumsRepository->find($id);
+        if (!$existingLumpSum) {
+            return $this->json(['error' => 'Lump Sums not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $this->lumpSumsRepository->updateLumpSums($existingLumpSum, $data);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Failed to update Lump Sums: ' . $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json([
+            'message' => 'Lump Sums updated successfully',
+            'data' => $existingLumpSum
+        ], Response::HTTP_OK);
+    }
+
 }

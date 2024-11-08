@@ -2,10 +2,12 @@
 
 namespace App\Repository;
 
+use App\DTO\FixedPrice;
+use App\DTO\Tariff;
 use App\Entity\LumpSums;
-use App\Entity\Region;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<LumpSums>
@@ -26,28 +28,34 @@ class LumpSumsRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    //    /**
-    //     * @return FixedPrice[] Returns an array of FixedPrice objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('f')
-    //            ->andWhere('f.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('f.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function removeLumpSums(Uuid $id): void
+    {
+        $lumpSums = $this->findOneBy(['id' => $id]);
+        $this->getEntityManager()->remove($lumpSums);
+        $this->getEntityManager()->flush();
 
-    //    public function findOneBySomeField($value): ?FixedPrice
-    //    {
-    //        return $this->createQueryBuilder('f')
-    //            ->andWhere('f.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    }
+
+    public function updateLumpSums(LumpSums $existingLumpSums, array $data): void
+    {
+        if (isset($data['name'])) {
+            $existingLumpSums->setName($data['name']);
+        }
+
+        if (isset($data['fixedValues'])) {
+            // Convert each item in 'fixedValues' to a FixedPrice object
+            $fixedValues = array_map(
+                fn($valueData) => new FixedPrice(
+                    $valueData['name'],
+                    Tariff::fromArray($valueData['tariff1']),
+                    Tariff::fromArray($valueData['tariff2'])
+                ),
+                $data['fixedValues']
+            );
+            $existingLumpSums->setFixedValues($fixedValues);
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
 }

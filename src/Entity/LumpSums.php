@@ -48,4 +48,14 @@ class LumpSums implements \JsonSerializable
           'fixedValues' => $this->fixedValues,
         ];
     }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setFixedValues(array $fixedValues): void
+    {
+        $this->fixedValues = $fixedValues;
+    }
 }

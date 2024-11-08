@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 class HotelController extends AbstractController
 {
@@ -47,7 +48,11 @@ class HotelController extends AbstractController
             $newLumpSums
         );
 
-        $this->hotelRepository->addHotel($hotel);
+        try {
+            $this->hotelRepository->addHotel($hotel);
+        } catch (\PDOException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
         return new JsonResponse(['message' => 'Created hotel with id ' . $hotel->getId()], Response::HTTP_CREATED);
     }
 
@@ -61,12 +66,38 @@ class HotelController extends AbstractController
         if (!$existingHotel) {
             return new JsonResponse(['error' => 'Hotel not found'], Response::HTTP_NOT_FOUND);
         }
-        $this->hotelRepository->updateHotel(
-            $existingHotel,
-            $data
-        );
+        try {
+            $this->hotelRepository->updateHotel(
+                $existingHotel,
+                $data
+            );
+        } catch (\PDOException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
 
         return new JsonResponse(['message' => 'Hotel updated successfully'], Response::HTTP_OK);
+    }
+
+    #[Route('/hotel/{id}', name: 'get_hotel', methods: ['GET'])]
+    public function hotelInfo(string $id): JsonResponse
+    {
+        $hotel = $this->hotelRepository->find($id);
+        if (!$hotel) {
+            return new JsonResponse(['error' => 'Hotel not found'], Response::HTTP_NOT_FOUND);
+        }
+        return new JsonResponse([$hotel]);
+    }
+
+    #[Route('/hotel/{id}/delete', name: 'delete_hotel', methods: ['DELETE'])]
+    public function removeHotel(Uuid $id): JsonResponse
+    {
+        try {
+            $this->hotelRepository->removeHotel($id);
+        } catch (\PDOException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+        return $this->json(['message' => 'Hotel with id ' .$id.  'removed successfully'], Response::HTTP_OK);
     }
 
 

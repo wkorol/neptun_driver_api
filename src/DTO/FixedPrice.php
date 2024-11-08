@@ -36,10 +36,10 @@ class FixedPrice implements \JsonSerializable
     {
         return [
             'name' => $this->name,
-            '1tariff' => [
+            'tariff1' => [
                 $this->getTariff1()
             ],
-            '2tariff' => [
+            'tariff2' => [
                 $this->getTariff2()
             ],
         ];

@@ -53,6 +53,7 @@ class LumpSumsController extends AbstractController
         $this->lumpSumsRepository->addLumpSums($fixedPrice);
 
         return $this->json([
+            'id' => $fixedPrice->getId(),
             'message' => 'Added new Lump Sums'
         ]);
     }

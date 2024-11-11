@@ -32,19 +32,6 @@ class RegionRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function getHotelsByRegion(int $id): array
-    {
-        return $this->createQueryBuilder('r')
-            ->innerJoin('r.hotels', 'h')            // Join the hotels associated with the region
-            ->leftJoin('h.lump_sums', 'ls')         // Join the `lump_sums` association in `Hotel`
-            ->leftJoin('h.new_lump_sums', 'nls')    // Join the `new_lump_sums` association in `Hotel`
-            ->addSelect('h', 'ls', 'nls')           // Select hotels and lump sums
-            ->where('r.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getArrayResult();
-    }
-
     public function editRegion(int $id, mixed $data): void
     {
         $region = $this->findOneBy(['id' => $id]);

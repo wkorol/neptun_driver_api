@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Region;
+use App\Repository\HotelRepository;
 use App\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,6 +16,7 @@ class RegionController extends AbstractController
 {
     public function __construct(
         private readonly RegionRepository $regionRepository,
+        private readonly HotelRepository $hotelRepository
     ) {
     }
 
@@ -29,7 +31,7 @@ class RegionController extends AbstractController
     #[Route('/region/{id}/hotels', name: 'app_region_hotels', methods: ['GET'])]
     public function getHotels(int $id): JsonResponse
     {
-        $hotels = $this->regionRepository->getHotelsByRegion($id);
+        $hotels = $this->hotelRepository->getHotelsByRegion($id);
         return $this->json($hotels);
     }
 

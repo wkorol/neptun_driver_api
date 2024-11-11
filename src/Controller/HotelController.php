@@ -86,7 +86,7 @@ class HotelController extends AbstractController
         if (!$hotel) {
             return new JsonResponse(['error' => 'Hotel not found'], Response::HTTP_NOT_FOUND);
         }
-        return new JsonResponse([$hotel]);
+        return new JsonResponse($hotel);
     }
 
     #[Route('/hotel/{id}/delete', name: 'delete_hotel', methods: ['DELETE'])]

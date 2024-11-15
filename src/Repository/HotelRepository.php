@@ -70,6 +70,9 @@ class HotelRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @return Hotel[]
+     */
     public function getHotelsByRegion(int $id): array
     {
         return $this->createQueryBuilder('h')

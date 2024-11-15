@@ -79,12 +79,13 @@ class HotelRepository extends ServiceEntityRepository
             ->leftJoin('h.lump_sums', 'ls')
             ->leftJoin('h.region', 'r')
             ->leftJoin('h.new_lump_sums', 'nls')        // Join the `new_lump_sums` association in `Hotel`
-            ->addSelect('ls', 'nls', 'r')                    // Select lump sums
+            ->addSelect('ls', 'nls', 'r')               // Select related entities
             ->where('h.region = :id')                   // Filter by region ID
             ->setParameter('id', $id)
             ->getQuery()
-            ->getArrayResult();
+            ->getResult(); // Return mapped Hotel entities
     }
+
 
     public function removeHotel(Uuid $id): void
     {

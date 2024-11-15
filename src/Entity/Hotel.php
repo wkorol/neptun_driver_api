@@ -128,7 +128,7 @@ class Hotel implements \JsonSerializable
           'lump_sums' => $this->lump_sums,
           'lump_sums_expire_date' => $this->lump_sums_expire_date,
           'new_lump_sums' => $this->new_lump_sums,
-          'update_date' => $this->update_date
+          'update_date' => $this->update_date->format('Y-m-d H:i:s'),
         ];
     }
 

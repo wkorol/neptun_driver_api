@@ -31,7 +31,8 @@ class RegionController extends AbstractController
     #[Route('/region/{id}/hotels', name: 'app_region_hotels', methods: ['GET'])]
     public function getHotels(int $id): JsonResponse
     {
-        $hotels = $this->hotelRepository->getHotelsByRegion($id);
+        $region = $this->regionRepository->findOneBy(['id' => $id]);
+        $hotels = $region->getHotels();
         return $this->json($hotels);
     }
 

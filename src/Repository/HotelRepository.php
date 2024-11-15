@@ -75,15 +75,7 @@ class HotelRepository extends ServiceEntityRepository
      */
     public function getHotelsByRegion(int $id): array
     {
-        return $this->createQueryBuilder('h')
-            ->leftJoin('h.lump_sums', 'ls')
-            ->leftJoin('h.region', 'r')
-            ->leftJoin('h.new_lump_sums', 'nls')        // Join the `new_lump_sums` association in `Hotel`
-            ->addSelect('ls', 'nls', 'r')               // Select related entities
-            ->where('h.region = :id')                   // Filter by region ID
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getResult(); // Return mapped Hotel entities
+        return $this->findBy(['regionId' => $id]);
     }
 
 

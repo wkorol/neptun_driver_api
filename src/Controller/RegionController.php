@@ -16,7 +16,6 @@ class RegionController extends AbstractController
 {
     public function __construct(
         private readonly RegionRepository $regionRepository,
-        private readonly HotelRepository $hotelRepository
     ) {
     }
 
@@ -24,7 +23,7 @@ class RegionController extends AbstractController
     public function index(): JsonResponse
     {
         return $this->json(
-            $this->regionRepository->findAll()
+            $this->regionRepository->findBy([], ['position', 'ASC'])
         );
     }
 

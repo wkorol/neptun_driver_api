@@ -25,6 +25,9 @@ class Region implements \JsonSerializable
     #[ORM\OneToMany(targetEntity: Hotel::class, mappedBy: 'region')]
     private Collection $hotels;
 
+    #[ORM\Column(type: 'integer', unique: true, nullable: true)]
+    private ?int $position = null;
+
     public function __construct(int $id, string $name)
     {
         $this->id = $id;
@@ -53,6 +56,11 @@ class Region implements \JsonSerializable
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getPosition(): int
+    {
+        return $this->position;
     }
 
     public function jsonSerialize(): array

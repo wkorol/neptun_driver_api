@@ -66,7 +66,7 @@ class HotelRepository extends ServiceEntityRepository
         $hotel = $this->findOneBy(['name' => $name]);
 
         if ($hotel && ($id === null || !$hotel->getId()->equals($id))) {
-            throw new \PDOException('Hotel already exists!');
+            throw new \PDOException('Hotel o podanej nazwie już istnieje w systemie.');
         }
     }
 
@@ -91,7 +91,7 @@ class HotelRepository extends ServiceEntityRepository
     {
         $hotel = $this->findOneBy(['id' => $id]);
         if (!$hotel) {
-            throw new \PDOException('Hotel not found!');
+            throw new \PDOException('Hotel nieznaleziony.');
         }
         $this->getEntityManager()->remove($hotel);
         $this->getEntityManager()->flush();

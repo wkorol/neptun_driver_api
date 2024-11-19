@@ -37,7 +37,7 @@ class HotelController extends AbstractController
             : null;
 
         if (!$region || !$lumpSums) {
-            return new JsonResponse(['error' => 'Invalid Region or LumpSums ID'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => 'Niepoprawne ID rejonu lub ID ryczałtów'], Response::HTTP_BAD_REQUEST);
         }
 
         $hotel = new Hotel(
@@ -53,7 +53,7 @@ class HotelController extends AbstractController
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return new JsonResponse(['message' => 'Created hotel with id ' . $hotel->getId()], Response::HTTP_CREATED);
+        return new JsonResponse(['message' => 'Utworzono hotel o ID ' . $hotel->getId()], Response::HTTP_CREATED);
     }
 
     #[Route('/hotel/{id}/edit', name: 'edit_hotel', methods: ['PUT'])]
@@ -64,7 +64,7 @@ class HotelController extends AbstractController
         // Find the existing hotel
         $existingHotel = $this->hotelRepository->find($id);
         if (!$existingHotel) {
-            return new JsonResponse(['error' => 'Hotel not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Hotel nieznaleziony.'], Response::HTTP_NOT_FOUND);
         }
         try {
             $this->hotelRepository->updateHotel(
@@ -76,7 +76,7 @@ class HotelController extends AbstractController
         }
 
 
-        return new JsonResponse(['message' => 'Hotel updated successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Hotel zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
     #[Route('/hotel/{id}', name: 'get_hotel', methods: ['GET'])]
@@ -84,7 +84,7 @@ class HotelController extends AbstractController
     {
         $hotel = $this->hotelRepository->find($id);
         if (!$hotel) {
-            return new JsonResponse(['error' => 'Hotel not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Hotel nieznaleziony.'], Response::HTTP_NOT_FOUND);
         }
         return new JsonResponse($hotel);
     }
@@ -97,7 +97,7 @@ class HotelController extends AbstractController
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return $this->json(['message' => 'Hotel with id ' .$id.  'removed successfully'], Response::HTTP_OK);
+        return $this->json(['message' => 'Hotel o id ' .$id.  'został usunięty.'], Response::HTTP_OK);
     }
 
 

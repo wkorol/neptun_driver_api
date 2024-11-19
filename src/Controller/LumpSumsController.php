@@ -54,7 +54,7 @@ class LumpSumsController extends AbstractController
 
         return $this->json([
             'id' => $fixedPrice->getId(),
-            'message' => 'Added new Lump Sums'
+            'message' => 'Utworzono nowy zestaw ryczałtów.'
         ]);
     }
 
@@ -62,7 +62,7 @@ class LumpSumsController extends AbstractController
     public function removeRegion(Uuid $id): JsonResponse
     {
         $this->lumpSumsRepository->removeLumpSums($id);
-        return $this->json(['message' => 'Lump sums with id '. $id . ' removed'], Response::HTTP_OK);
+        return $this->json(['message' => 'Ryczałty o ID '. $id . ' zostały usunięte.'], Response::HTTP_OK);
     }
 
     #[Route('/lump_sums/{id}/edit', name: 'edit_lump_sums', methods: ['PUT'])]
@@ -80,13 +80,13 @@ class LumpSumsController extends AbstractController
         // Find the existing LumpSums entity
         $existingLumpSum = $this->lumpSumsRepository->find($id);
         if (!$existingLumpSum) {
-            return $this->json(['error' => 'Lump Sums not found'], Response::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'Ryczałty nieznalezione.'], Response::HTTP_NOT_FOUND);
         }
 
         try {
             $this->lumpSumsRepository->updateLumpSums($existingLumpSum, $data);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Failed to update Lump Sums: ' . $e->getMessage()], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Błąd w aktualizacji ryczałtów: ' . $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->json([

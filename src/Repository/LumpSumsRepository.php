@@ -22,7 +22,7 @@ class LumpSumsRepository extends ServiceEntityRepository
     public function addLumpSums(LumpSums $fixedPrice): void
     {
         if ($this->find($fixedPrice->getId()) !== null) {
-            throw new \PDOException('Region already exists.');
+            throw new \PDOException('Ryczałty o podanym ID już istnieją.');
         }
         $this->getEntityManager()->persist($fixedPrice);
         $this->getEntityManager()->flush();

@@ -23,7 +23,7 @@ class RegisterController extends AbstractController
 
         // Basic validation
         if (empty($data['email']) || empty($data['password'])) {
-            return new JsonResponse(['error' => 'Email and password are required.'], 400);
+            return new JsonResponse(['error' => 'Email i hasło wymagane.'], 400);
         }
 
         // Create the user with email, password, and default roles
@@ -37,7 +37,7 @@ class RegisterController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'User registered successfully'], 201);
+        return new JsonResponse(['message' => 'Użytkownik zarejestrowany poprawnie.'], 201);
     }
 }
 

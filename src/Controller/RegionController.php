@@ -52,7 +52,7 @@ class RegionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Region added successfully',
+            'message' => 'Rejon dodany poprawnie.',
             'region' => [
                 'id' => $region->getId(),
                 'name' => $region->getName(),
@@ -65,13 +65,13 @@ class RegionController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $this->regionRepository->editRegion($id, $data);
-        return $this->json(['message' => 'Region edited successfully'], Response::HTTP_OK);
+        return $this->json(['message' => 'Rejon zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
     #[Route('/region/{id}/delete', name: 'remove_region', methods: ['DELETE'])]
     public function removeRegion(int $id): JsonResponse
     {
         $this->regionRepository->removeRegion($id);
-        return $this->json(['message' => 'Region with id '. $id . 'has been removed'], Response::HTTP_OK);
+        return $this->json(['message' => 'Rejon o id '. $id . 'został usunięty.'], Response::HTTP_OK);
     }
 }

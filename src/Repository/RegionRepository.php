@@ -19,7 +19,7 @@ class RegionRepository extends ServiceEntityRepository
     public function addRegion(Region $region): void
     {
         if ($this->find($region->getId()) !== null) {
-            throw new \PDOException('Region already exists.');
+            throw new \PDOException('Rejon o podanym ID już istnieje.');
         }
         $this->getEntityManager()->persist($region);
         $this->getEntityManager()->flush();

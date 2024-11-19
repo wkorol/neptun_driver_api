@@ -22,7 +22,7 @@ class HotelController extends AbstractController
     #[Route('/hotel', name: 'app_hotel')]
     public function index(): JsonResponse
     {
-        return new JsonResponse($this->hotelRepository->findAll());
+        return new JsonResponse($this->hotelRepository->findBy([], ['name' => 'ASC']));
     }
 
     #[Route('/hotel/add', name: 'add_hotel')]

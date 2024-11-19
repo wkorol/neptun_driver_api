@@ -23,7 +23,7 @@ class RegionController extends AbstractController
     public function index(): JsonResponse
     {
         return $this->json(
-            $this->regionRepository->findBy([], ['position', 'ASC'])
+            $this->regionRepository->findBy([], ['position' => 'ASC'])
         );
     }
 

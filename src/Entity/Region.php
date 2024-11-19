@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\RegionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\Uid\Uuid;
@@ -48,9 +49,12 @@ class Region implements \JsonSerializable
     /**
      * @return Collection<int, Hotel>
      */
-    public function getHotels(): Collection
+    public function getHotelsSortedByName(): Collection
     {
-        return $this->hotels;
+        $criteria = Criteria::create()
+            ->orderBy(['name' => 'ASC']);
+
+        return $this->hotels->matching($criteria);
     }
 
     public function setName(string $name): void

@@ -31,7 +31,7 @@ class RegionController extends AbstractController
     public function getHotels(int $id): JsonResponse
     {
         $region = $this->regionRepository->findOneBy(['id' => $id]);
-        $hotels = $region->getHotels();
+        $hotels = $region->getHotelsSortedByName();
         return $this->json($hotels);
     }
 

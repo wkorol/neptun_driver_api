@@ -22,22 +22,22 @@ class FixedPrice implements \JsonSerializable
         return $this->name;
     }
 
-    public function getTariff1(): array
+    public function getTariff1(): Tariff
     {
-        return $this->tariff1->jsonSerialize();
+        return $this->tariff1;
     }
 
-    public function getTariff2(): array
+    public function getTariff2(): Tariff
     {
-        return $this->tariff2->jsonSerialize();
+        return $this->tariff2;
     }
 
     public function jsonSerialize(): array
     {
         return [
             'name' => $this->name,
-            'tariff1' => $this->getTariff1(),
-            'tariff2' => $this->getTariff2()
+            'tariff1' => $this->getTariff1()->jsonSerialize(),
+            'tariff2' => $this->getTariff2()->jsonSerialize()
         ];
     }
 }

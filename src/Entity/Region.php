@@ -7,8 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Integer;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: RegionRepository::class)]
 class Region implements \JsonSerializable

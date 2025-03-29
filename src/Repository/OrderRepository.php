@@ -18,11 +18,17 @@ class OrderRepository extends ServiceEntityRepository
     }
     public function addOrder(Order $order): void
     {
+        /**
+         * @var Order|null $existing
+         */
         $existing = $this->findOneBy(['externalId' => $order->getExternalId()]);
 
         if ($existing) {
             if ($existing->getStatus()?->value !== $order->getStatus()?->value) {
                 $this->updateOrderStatus($existing, $order->getStatus()?->value);
+            }
+            if ($existing?->getPlannedArrivalDate() !== $order?->getPlannedArrivalDate()) {
+                $this->updatePlannedArrivalDate($existing, $order->getPlannedArrivalDate());
             }
             return;
         }
@@ -51,13 +57,53 @@ class OrderRepository extends ServiceEntityRepository
         $order->setStatus($status);
     }
 
-    public function findScheduledOrders(): ?array
+    public function updatePlannedArrivalDate(Order $order, \DateTimeImmutable $plannedArrivalDate): void
+    {
+        $order->setArrivalDate($plannedArrivalDate);
+    }
+
+    public function findActualOrders(): ?array
     {
         return $this->createQueryBuilder('o')
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults(25)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findScheduledOrdersForToday(): ?array
+    {
+        $startOfDay = new \DateTimeImmutable('today 00:00:00');
+        $endOfDay = new \DateTimeImmutable('today 23:59:59');
+
+        return $this->createQueryBuilder('o')
             ->where('o.plannedArrivalDate IS NOT NULL')
-            ->andWhere('o.status = 4')
+            ->andWhere('o.status = :status')
+            ->andWhere('o.plannedArrivalDate BETWEEN :start AND :end')
+            ->setParameter('status', 4)
+            ->setParameter('start', $startOfDay)
+            ->setParameter('end', $endOfDay)
             ->orderBy('o.plannedArrivalDate', 'ASC')
             ->getQuery()
             ->getResult();
     }
+
+    public function findScheduledOrdersForNext5Days(): ?array
+    {
+        $start = new \DateTimeImmutable('tomorrow 00:00:00');
+        $end = (new \DateTimeImmutable('today'))->modify('+5 days')->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('o')
+            ->where('o.plannedArrivalDate IS NOT NULL')
+            ->andWhere('o.status = :status')
+            ->andWhere('o.plannedArrivalDate BETWEEN :start AND :end')
+            ->setParameter('status', 4)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('o.plannedArrivalDate', 'ASC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+    }
+
 }

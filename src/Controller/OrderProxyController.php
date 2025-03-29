@@ -7,6 +7,7 @@ namespace App\Controller;
 
 use App\Service\MamTaxiClient;
 use App\Service\OrderImporter;
+use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -62,6 +63,18 @@ class OrderProxyController extends AbstractController
             'cookies' => $client->getDebugCookies(),
         ]);
     }
+
+
+    #[Route('/api/session/check', name: 'check_session')]
+    public function checkSession(MamTaxiClient $client): JsonResponse
+    {
+        if ($client->isSessionValid()) {
+            return new JsonResponse('Session valid', 200);
+        }
+        return new JsonResponse('Session expired', 401);
+    }
+
+
 
     #[Route('/import-orders/', name: 'import_orders')]
     public function importOrders(OrderImporter $importer): JsonResponse

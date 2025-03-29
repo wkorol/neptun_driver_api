@@ -17,9 +17,21 @@ class OrderController extends AbstractController
     {
     }
 
-    #[Route('/orders/scheduled', name: 'orders_scheduled', methods: ['GET'])]
-    public function getScheduledOrders(): JsonResponse
+    #[Route('/orders/scheduled/today', name: 'orders_scheduled', methods: ['GET'])]
+    public function getScheduledOrdersForToday(): JsonResponse
     {
-        return new JsonResponse($this->orderRepository->findScheduledOrders());
+        return new JsonResponse($this->orderRepository->findScheduledOrdersForToday());
+    }
+
+    #[Route('/orders/scheduled/next5days', name: 'orders_scheduled_next5days', methods: ['GET'])]
+    public function getScheduledOrdersForNext5Days(): JsonResponse
+    {
+        return new JsonResponse($this->orderRepository->findScheduledOrdersForNext5Days());
+    }
+
+    #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
+    public function getActualOrders(): JsonResponse
+    {
+        return new JsonResponse($this->orderRepository->findActualOrders());
     }
 }

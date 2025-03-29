@@ -15,9 +15,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class OrderProxyController extends AbstractController
 {
     #[Route('/api/proxy/login', name: 'proxy_login')]
-    public function login(string $phone, string $code, MamTaxiClient $client): JsonResponse
+    public function login(MamTaxiClient $client): JsonResponse
     {
-        if ($client->login($phone, $code)) {
+        if ($client->login()) {
             return $this->json(['message' => 'Logged in']);
         }
 

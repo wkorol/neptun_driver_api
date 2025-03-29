@@ -1,6 +1,6 @@
 nelmio_cors:
     defaults:
-        allow_origin: ['https://frontend-neptun-o59eg.ondigitalocean.app', '*']
+        allow_origin: ['https://frontend-neptun-o59eg.ondigitalocean.app']
         allow_credentials: true
         allow_headers: ['Content-Type', 'Authorization', 'X-Requested-With']
         allow_methods: ['GET', 'POST', 'OPTIONS']

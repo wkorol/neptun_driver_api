@@ -7,7 +7,6 @@ namespace App\Controller;
 
 use App\Service\MamTaxiClient;
 use App\Service\OrderImporter;
-use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -15,18 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderProxyController extends AbstractController
 {
-    #[Route('/api/proxy/send-sms/{phone}', name: 'proxy_send_sms')]
-    public function sendSms(string $phone, MamTaxiClient $client): JsonResponse
-    {
-        try {
-            $client->sendSmsToken($phone);
-            return $this->json(['message' => 'SMS sent']);
-        } catch (\Exception $e) {
-            return $this->json(['error' => 'Failed to send SMS'], 500);
-        }
-    }
-
-    #[Route('/api/proxy/login/{phone}/{code}', name: 'proxy_login')]
+    #[Route('/api/proxy/login', name: 'proxy_login')]
     public function login(string $phone, string $code, MamTaxiClient $client): JsonResponse
     {
         if ($client->login($phone, $code)) {

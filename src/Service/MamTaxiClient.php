@@ -43,12 +43,7 @@ class MamTaxiClient
         ]);
     }
 
-    public function sendSmsToken(string $phone): ResponseInterface
-    {
-        return $this->httpClient->post("/Account/GeneratePhoneToken?phoneNumber={$phone}");
-    }
-
-    public function login(string $phone, string $code): bool
+    public function login(): bool
     {
         $response = $this->httpClient->get('/Account/Login');
         $html = (string) $response->getBody();
@@ -61,8 +56,8 @@ class MamTaxiClient
 
         $response = $this->httpClient->post('/Account/Login', [
             'form_params' => [
-                'Login' => $phone,
-                'Password' => $code,
+                'Login' => "wiktorkorol@gmail.com",
+                'Password' => "760661",
                 'RememberMe' => 'true',
                 '__RequestVerificationToken' => $token,
             ],

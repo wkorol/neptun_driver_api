@@ -5,7 +5,8 @@ framework:
 
     # Note that the session will be started ONLY if you read or write from it.
     session:
-        cookie_secure: auto
+        handler_id: null
+        cookie_secure: true
         cookie_samesite: none
         cookie_domain: '.ondigitalocean.app' # <- kluczowe!
 

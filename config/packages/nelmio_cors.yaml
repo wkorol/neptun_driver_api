@@ -1,7 +1,7 @@
 nelmio_cors:
     defaults:
         allow_credentials: true
-        allow_origin: ['https://apineptun-ij5mx.ondigitalocean.app/']
+        allow_origin: ['https://frontend-neptun-o59eg.ondigitalocean.app']
         allow_headers: ['Content-Type', 'Authorization', 'X-Requested-With']
         allow_methods: ['GET', 'POST', 'OPTIONS']
         max_age: 3600

@@ -235,7 +235,7 @@ class Order implements \JsonSerializable
         $this->status = $status;
     }
 
-    public function setArrivalDate(\DateTimeImmutable $plannedArrivalDate): void
+    public function setArrivalDate(?\DateTimeImmutable $plannedArrivalDate): void
     {
         $this->plannedArrivalDate = $plannedArrivalDate;
     }

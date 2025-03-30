@@ -33,6 +33,9 @@ class OrderRepository extends ServiceEntityRepository
             if ($existing?->getPlannedArrivalDate() !== $order->getPlannedArrivalDate()) {
                 $this->updatePlannedArrivalDate($existing, $order->getPlannedArrivalDate());
             }
+            if ($existing->getTaxiNumber() !== $order->getTaxiNumber()) {
+                $existing->setTaxiNumber($order->getTaxiNumber());
+            }
             return;
         }
 

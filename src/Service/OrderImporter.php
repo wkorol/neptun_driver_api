@@ -42,8 +42,8 @@ class OrderImporter
             }
 
             // Add 1 hour
-            $createdAtPlusOneHour = $createdAt?->modify('+2 hour');
-            $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+2 hour');
+            $createdAtPlusTwoHour = $createdAt?->modify('+2 hour');
+            $plannedArrivalDatePlusTwoHour = $plannedArrivalDate?->modify('+2 hour');
             $companyName = $data['CompanyName'] ?? null;
             $price = $data['Price'] ?? null;
             $passengerCount = $data['PassengersCount'] ?? null;
@@ -51,8 +51,8 @@ class OrderImporter
             try {
                 $order = new Order(
                     externalId: $externalId,
-                    createdAt: $createdAtPlusOneHour,
-                    plannedArrivalDate: $plannedArrivalDatePlusOneHour,
+                    createdAt: $createdAtPlusTwoHour,
+                    plannedArrivalDate: $plannedArrivalDatePlusTwoHour,
                     status: $status,
                     city: $city,
                     street: $street,
@@ -114,8 +114,8 @@ class OrderImporter
                 $plannedArrivalDate = $data['PlannedArrivalDate'] ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null;
 
                 // Add 1 hour
-                $createdAtPlusOneHour = $createdAt?->modify('+1 hour');
-                $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+1 hour');
+                $createdAtPlusOneHour = $createdAt?->modify('+2 hour');
+                $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+2 hour');
                 $companyName = $data['CompanyName'] ?? null;
                 $price = $data['Price'] ?? null;
                 $passengerCount = $data['PassengerCount'] ?? null;

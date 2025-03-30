@@ -128,12 +128,14 @@ class OrderRepository extends ServiceEntityRepository
         $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
 
-        if ($order->getPlannedArrivalDate() != $plannedArrivalDatePlusTwoHours) {
+        if (
+            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
+        ) {
             $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
             $changed = true;
         }
 
-        if ($order->getStatus() !== $status) {
+        if ($order->getStatus()->value !== $status) {
             $order->setStatus($status);
             $changed = true;
         }

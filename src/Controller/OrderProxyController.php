@@ -75,7 +75,7 @@ class OrderProxyController extends AbstractController
     public function importOrdersFromExternalApi(MamTaxiClient $client, OrderImporter $importer, string $howMany): JsonResponse
     {
         if (!$client->isSessionValid()) {
-            return new JsonResponse('Session expired', 401);
+            $client->login();
         }
 
         $orders = $client->fetchOrdersWithDetails((int)$howMany);

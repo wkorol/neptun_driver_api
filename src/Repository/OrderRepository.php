@@ -27,29 +27,16 @@ class OrderRepository extends ServiceEntityRepository
             if ($existing->getStatus()?->value !== $order->getStatus()?->value) {
                 $this->updateOrderStatus($existing, $order->getStatus()?->value);
             }
-            if ($existing?->getPlannedArrivalDate() !== $order?->getPlannedArrivalDate()) {
+            if ($existing?->getCreatedAt() !== $order->getCreatedAt()) {
+                $this->updateCreatedAt($existing, $order->getCreatedAt());
+            }
+            if ($existing?->getPlannedArrivalDate() !== $order->getPlannedArrivalDate()) {
                 $this->updatePlannedArrivalDate($existing, $order->getPlannedArrivalDate());
             }
             return;
         }
 
         $this->getEntityManager()->persist($order);
-    }
-
-    public function checkIfExists(int $externalId, int $status): void
-    {
-        /**
-         * @var Order|null $order
-         */
-        $order = $this->findOneBy(['externalId' => $externalId]);
-
-        if ($order) {
-            if ($order->getStatus()->value !== $status) {
-                $this->updateOrderStatus($order, $status);
-            } else {
-                throw new \PDOException('Zamówienie istnieje już w systemie.');
-            }
-        }
     }
 
     public function updateOrderStatus(Order $order, ?int $status): void
@@ -106,4 +93,77 @@ class OrderRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    private function updateCreatedAt(?Order $order, \DateTimeImmutable $createdAt): void
+    {
+        $order->setCreatedAt($createdAt);
+    }
+
+    public function deleteAllFinished(): void
+    {
+        $qb = $this->createQueryBuilder('o');
+
+        $qb->delete()
+            ->where($qb->expr()->in('o.status', [8, 12, 7]));
+
+        $qb->getQuery()->execute();
+    }
+
+    public function updateOrder(Order $order, array $data): bool
+    {
+        $changed = false;
+
+        $plannedArrivalDate = isset($data['PlannedArrivalDate']) ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null;
+
+        $status = $data['Status'];
+        if (is_string($status)) {
+            return false;
+        }
+
+        $notes = $data['Notes'] ?? null;
+        $phoneNumber = $data['PhoneNumber'] ?? null;
+        $companyName = $data['CompanyName'] ?? null;
+        $price = $data['Price'] ?? null;
+        $passengerCount = $data['PassengersCount'] ?? null;
+
+        $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
+
+
+        if ($order->getPlannedArrivalDate() != $plannedArrivalDatePlusTwoHours) {
+            $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
+            $changed = true;
+        }
+
+        if ($order->getStatus() !== $status) {
+            $order->setStatus($status);
+            $changed = true;
+        }
+
+
+        if ($order->getNotes() !== $notes) {
+            $order->setNotes($notes);
+            $changed = true;
+        }
+
+        if ($order->getPhoneNumber() !== $phoneNumber) {
+            $order->setPhoneNumber($phoneNumber);
+            $changed = true;
+        }
+
+        if ($order->getCompanyName() !== $companyName) {
+            $order->setCompanyName($companyName);
+            $changed = true;
+        }
+
+        if ($order->getPrice() !== $price) {
+            $order->setPrice($price);
+            $changed = true;
+        }
+
+        if ($order->getPassengerCount() !== $passengerCount) {
+            $order->setPassengerCount($passengerCount);
+            $changed = true;
+        }
+
+        return $changed;
+    }
 }

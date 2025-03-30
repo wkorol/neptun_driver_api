@@ -42,11 +42,11 @@ class OrderImporter
             }
 
             // Add 1 hour
-            $createdAtPlusOneHour = $createdAt?->modify('+1 hour');
-            $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+1 hour');
+            $createdAtPlusOneHour = $createdAt?->modify('+2 hour');
+            $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+2 hour');
             $companyName = $data['CompanyName'] ?? null;
             $price = $data['Price'] ?? null;
-            $passengerCount = $data['PassengerCount'] ?? null;
+            $passengerCount = $data['PassengersCount'] ?? null;
 
             try {
                 $order = new Order(

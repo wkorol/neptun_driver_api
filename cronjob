@@ -1,3 +1,10 @@
 * * * * * /usr/local/bin/php /var/www/html/bin/console app:update-lump-sums >> /var/log/cron.log 2>&1
 
+# Import 200 orders every 2 hours
+0 */2 * * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/api/proxy/import-orders/200 >> /var/log/cron_mamtaxi_import.log 2>&1
 
+# Update all existing orders every 3 days at 02:00 AM
+0 2 */3 * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/orders/update-all >> /var/log/cron_orders_update.log 2>&1
+
+# Delete all finished orders every 2 days at 03:00 AM
+0 3 */2 * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/orders/delete-all-finished >> /var/log/cron_orders_delete.log 2>&1

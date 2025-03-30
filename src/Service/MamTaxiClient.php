@@ -219,11 +219,9 @@ class MamTaxiClient
             ]);
         }
 
-        // Wait for all requests to complete
         $results = Promise\Utils::settle($promises)->wait();
 
 
-        // Merge results
         $merged = [];
         foreach ($orders as $order) {
             $id = $order['Id'];
@@ -240,6 +238,11 @@ class MamTaxiClient
 
     public function fetchOrderDetails(int $id): array
     {
+        if (!$this->isSessionValid()) {
+            if (!$this->login()) {
+                throw new \Exception('Failed');
+            }
+        }
         $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
             'headers' => [
                 'X-Requested-With' => 'XMLHttpRequest',

@@ -5,7 +5,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Order;
 use App\Repository\OrderRepository;
+use App\Service\MamTaxiClient;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderController extends AbstractController
 {
-    public function __construct(private OrderRepository $orderRepository)
+    public function __construct(private OrderRepository $orderRepository, private MamTaxiClient $mamTaxiClient, private EntityManagerInterface $em)
     {
     }
 
@@ -34,4 +37,39 @@ class OrderController extends AbstractController
     {
         return new JsonResponse($this->orderRepository->findActualOrders());
     }
+
+    #[Route('/orders/update-all', name: 'update_all_existing_orders', methods: ['GET'])]
+    public function updateAllExistingOrders(): JsonResponse
+    {
+        $orders = $this->orderRepository->findAll();
+        $updatedCount = 0;
+        $batchSize = 100;
+
+        if ($orders) {
+            $chunks = array_chunk($orders, $batchSize);
+            foreach ($chunks as $chunk) {
+                foreach ($chunk as $order) {
+                    $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId());
+
+                    if ($this->orderRepository->updateOrder($order, $data)) {
+                        $updatedCount++;
+                    }
+                }
+
+                $this->em->flush();
+                $this->em->clear();
+            }
+        }
+
+        return new JsonResponse("Updated {$updatedCount} orders");
+    }
+
+    #[Route('/orders/delete-all-finished', name: 'delete_all_finished', methods: ['GET'])]
+    public function deleteAllFinished(): JsonResponse
+    {
+        $this->orderRepository->deleteAllFinished();
+
+        return new JsonResponse("Deleted finished orders");
+    }
+
 }

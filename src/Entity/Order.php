@@ -87,6 +87,66 @@ class Order implements \JsonSerializable
         $this->passengerCount = $passengerCount;
     }
 
+    public function setCity(string $city): void
+    {
+        $this->city = $city;
+    }
+
+    public function setStreet(?string $street): void
+    {
+        $this->street = $street;
+    }
+
+    public function setHouse(?string $house): void
+    {
+        $this->house = $house;
+    }
+
+    public function setFrom(string $from): void
+    {
+        $this->from = $from;
+    }
+
+    public function setTaxiNumber(?string $taxiNumber): void
+    {
+        $this->taxiNumber = $taxiNumber;
+    }
+
+    public function setDestination(?string $destination): void
+    {
+        $this->destination = $destination;
+    }
+
+    public function setNotes(?string $notes): void
+    {
+        $this->notes = $notes;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): void
+    {
+        $this->phoneNumber = $phoneNumber;
+    }
+
+    public function setCompanyName(?string $companyName): void
+    {
+        $this->companyName = $companyName;
+    }
+
+    public function setPrice(?float $price): void
+    {
+        $this->price = $price;
+    }
+
+    public function setPassengerCount(?int $passengerCount): void
+    {
+        $this->passengerCount = $passengerCount;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
 
     public function getId(): Uuid
     {

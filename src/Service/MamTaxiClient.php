@@ -18,7 +18,7 @@ class MamTaxiClient
     private readonly Client $httpClient;
     private readonly CookieJarInterface $cookieJar;
     private readonly SessionInterface $session;
-    private string $baseUrl = 'https://mamtaxi.pl';
+    private string $baseUrl = 'https://super-worker.wiktorkorol.workers.dev/';
 
     public function __construct(private RequestStack $requestStack)
     {

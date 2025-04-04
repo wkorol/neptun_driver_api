@@ -24,20 +24,7 @@ class OrderRepository extends ServiceEntityRepository
         $existing = $this->findOneBy(['externalId' => $order->getExternalId()]);
 
         if ($existing) {
-            if ($existing->getStatus()?->value !== $order->getStatus()?->value) {
-                $this->updateOrderStatus($existing, $order->getStatus()?->value);
-            }
-            if ($existing?->getCreatedAt() !== $order->getCreatedAt()) {
-                $this->updateCreatedAt($existing, $order->getCreatedAt());
-            }
-            if ($existing->getPlannedArrivalDate() !== $order->getPlannedArrivalDate()) {
-                if ($order->getPlannedArrivalDate() !== null) {
-                    $this->updatePlannedArrivalDate($existing, $order->getPlannedArrivalDate());
-                }
-            }
-            if ($existing->getTaxiNumber() !== $order->getTaxiNumber()) {
-                $existing->setTaxiNumber($order->getTaxiNumber());
-            }
+            $this->updateOrder($existing, $order->jsonSerialize());
             return;
         }
 
@@ -135,44 +122,49 @@ class OrderRepository extends ServiceEntityRepository
 
         $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
+        try {
+            if (
+                $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
+            ) {
+                $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
+                $changed = true;
+            }
 
-        if (
-            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
-        ) {
-            $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
-            $changed = true;
+            if ($order->getStatus()?->value) {
+                if ($order->getStatus()->value !== $status) {
+                    $order->setStatus($status);
+                    $changed = true;
+                }
+            }
+
+            if ($order->getNotes() !== $notes) {
+                $order->setNotes($notes);
+                $changed = true;
+            }
+
+            if ($order->getPhoneNumber() !== $phoneNumber) {
+                $order->setPhoneNumber($phoneNumber);
+                $changed = true;
+            }
+
+            if ($order->getCompanyName() !== $companyName) {
+                $order->setCompanyName($companyName);
+                $changed = true;
+            }
+
+            if ($order->getPrice() !== $price) {
+                $order->setPrice($price);
+                $changed = true;
+            }
+
+            if ($order->getPassengerCount() !== $passengerCount) {
+                $order->setPassengerCount($passengerCount);
+                $changed = true;
+            }
+        } catch (\Exception $e) {
+            dd($e->getMessage());
         }
 
-        if ($order->getStatus()->value !== $status) {
-            $order->setStatus($status);
-            $changed = true;
-        }
-
-
-        if ($order->getNotes() !== $notes) {
-            $order->setNotes($notes);
-            $changed = true;
-        }
-
-        if ($order->getPhoneNumber() !== $phoneNumber) {
-            $order->setPhoneNumber($phoneNumber);
-            $changed = true;
-        }
-
-        if ($order->getCompanyName() !== $companyName) {
-            $order->setCompanyName($companyName);
-            $changed = true;
-        }
-
-        if ($order->getPrice() !== $price) {
-            $order->setPrice($price);
-            $changed = true;
-        }
-
-        if ($order->getPassengerCount() !== $passengerCount) {
-            $order->setPassengerCount($passengerCount);
-            $changed = true;
-        }
 
         return $changed;
     }

@@ -244,20 +244,20 @@ class Order implements \JsonSerializable
     public function jsonSerialize(): array
     {
        return [
-           'createdAt' => $this->getCreatedAt(),
-           'plannedArrivalDate' => $this->getPlannedArrivalDate()?->format('Y-m-d\TH:i:sP'),
-           'status' => $this->getStatus()?->toLabel(),
-           'city' => $this->getCity(),
-           'street' => $this->getStreet(),
-           'house' => $this->getHouse(),
-           'from' => $this->getFrom(),
-           'taxiNumber' => $this->getTaxiNumber(),
-           'destination' => $this->getDestination(),
-           'notes' => $this->getNotes(),
-           'phoneNumber' => $this->getPhoneNumber(),
-           'companyName' => $this->getCompanyName(),
-           'price' => $this->getPrice(),
-           'passengerCount' => $this->getPassengerCount(),
+           'CreatedAt' => $this->getCreatedAt(),
+           'PlannedArrivalDate' => $this->getPlannedArrivalDate()?->format('Y-m-d\TH:i:sP'),
+           'Status' => $this->getStatus()?->toLabel(),
+           'City' => $this->getCity(),
+           'Street' => $this->getStreet(),
+           'House' => $this->getHouse(),
+           'From' => $this->getFrom(),
+           'TaxiNumber' => $this->getTaxiNumber(),
+           'Destination' => $this->getDestination(),
+           'Notes' => $this->getNotes(),
+           'PhoneNumber' => $this->getPhoneNumber(),
+           'CompanyName' => $this->getCompanyName(),
+           'Price' => $this->getPrice(),
+           'PassengersCount' => $this->getPassengerCount(),
        ];
     }
 }

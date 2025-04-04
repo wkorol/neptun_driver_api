@@ -112,7 +112,7 @@ class MamTaxiClient
     public function dumpAllOrdersToFiles(
         string $outputDir = __DIR__ . '/../../var/orders',
         string $statePath = __DIR__ . '/../../var/dump_state.json',
-        int $max = 30000,
+        int $max = 10000,
         int $chunk = 10000,
         int $batchSize = 100 // ilość zamówień na jedno zapytanie HTTP
     ): void {

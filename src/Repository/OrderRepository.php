@@ -54,17 +54,17 @@ class OrderRepository extends ServiceEntityRepository
     {
         $startOfDay = new \DateTimeImmutable('today 00:00:00');
         $endOfDay = new \DateTimeImmutable('today 23:59:59');
-        $oneHourAgo = (new \DateTimeImmutable())->modify('-1 hour');
+        $oneMinuteAgo = (new \DateTimeImmutable())->modify('-1 minutes');
 
         return $this->createQueryBuilder('o')
             ->where('o.plannedArrivalDate IS NOT NULL')
             ->andWhere('o.status = :status')
             ->andWhere('o.plannedArrivalDate BETWEEN :start AND :end')
-            ->andWhere('o.plannedArrivalDate > :oneHourAgo')
+            ->andWhere('o.plannedArrivalDate > :oneMinuteAgo')
             ->setParameter('status', 4)
             ->setParameter('start', $startOfDay)
             ->setParameter('end', $endOfDay)
-            ->setParameter('oneHourAgo', $oneHourAgo)
+            ->setParameter('oneMinuteAgo', $oneMinuteAgo)
             ->orderBy('o.plannedArrivalDate', 'ASC')
             ->getQuery()
             ->getResult();

@@ -62,6 +62,12 @@ class OrderProxyController extends AbstractController
         return new JsonResponse('Session expired', 401);
     }
 
+    #[Route('/find-driver/{id}', name: 'check_session')]
+    public function findDriver(MamTaxiClient $client, string $id): JsonResponse
+    {
+        return $client->findDriver($id);
+    }
+
 
 
     #[Route('/import-orders/', name: 'import_orders')]
@@ -87,6 +93,15 @@ class OrderProxyController extends AbstractController
         $importer->importFromArray($orders);
 
         return new JsonResponse('Import complete');
+    }
+
+    #[Route('/api/proxy/drivers/status', name: 'proxy_drivers_status')]
+    public function getDriversStatus(MamTaxiClient $client): JsonResponse
+    {
+        if (!$client->isSessionValid()) {
+            $client->login();
+        }
+        return $this->json($client->driverStatuses());
     }
 
 }

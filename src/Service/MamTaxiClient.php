@@ -7,6 +7,7 @@ namespace App\Service;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\CookieJarInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -251,5 +252,78 @@ class MamTaxiClient
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function findDriver(string $id): JsonResponse
+    {
+        if (!$this->isSessionValid()) {
+            if (!$this->login()) {
+                throw new \Exception('Failed');
+            }
+        }
+        for ($i = 16402; $i < 25000; $i++) {
+            try {
+                $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
+                    'headers' => [
+                        'X-Requested-With' => 'XMLHttpRequest',
+                        'Referer' => $this->baseUrl . '/',
+                    ],
+                ]);
+            } catch (\Exception $e) {
+                continue;
+            }
+            $data = json_decode($response->getBody()->getContents(), true);
+            if (isset($data['TaxiNo'])) {
+                if ($data['TaxiNo'] === $id) {
+                    return new JsonResponse($i, 200);
+                }
+            }
+
+        }
+        return new JsonResponse('Driver didnt found');
+    }
+
+    public function driverStatuses(): array
+    {
+        $driverUrls = [
+            'https://mamtaxi.pl/api/5550618/Driver/4348/Drivers/4348/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21914/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4406/Status',
+        ];
+
+        $promises = [];
+
+        foreach ($driverUrls as $url) {
+            $promises[] = $this->httpClient->getAsync($url, [
+                'headers' => [
+                    'X-Requested-With' => 'XMLHttpRequest',
+                    'Referer' => $this->baseUrl,
+                ],
+            ]);
+        }
+
+        $responses = \GuzzleHttp\Promise\Utils::settle($promises)->wait();
+
+        $driversStatus = [];
+
+        foreach ($responses as $response) {
+            if ($response['state'] === 'fulfilled') {
+                $data = json_decode($response['value']->getBody()->getContents(), true);
+                $driversStatus[] = [
+                    'TaxiNo' => $data['TaxiNo'] ?? null,
+                    'Latitude' => $data['Latitude'] ?? null,
+                    'Longitude' => $data['Longitude'] ?? null,
+                ];
+            } else {
+                $driversStatus[] = [
+                    'TaxiNo' => null,
+                    'Latitude' => null,
+                    'Longitude' => null,
+                    'error' => 'Request failed',
+                ];
+            }
+        }
+        return $driversStatus;
     }
 }

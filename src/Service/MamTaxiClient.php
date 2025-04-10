@@ -262,7 +262,7 @@ class MamTaxiClient
                 throw new \Exception('Failed');
             }
         }
-        for ($i = 30001; $i < 35000; $i++) {
+        for ($i = 22001; $i < 27000; $i++) {
             try {
                 $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
                     'headers' => [
@@ -275,7 +275,7 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'], ['178', '560'])) {
+                if (in_array($data['TaxiNo'], [ '101', '42'])) {
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
             }
@@ -299,6 +299,22 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4748/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/30003/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/30753/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4335/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4391/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4410/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4413/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4415/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4484/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4541/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4546/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4548/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4585/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4626/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4683/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4695/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4746/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23461/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/26551/Status',
         ];
 
         $promises = [];

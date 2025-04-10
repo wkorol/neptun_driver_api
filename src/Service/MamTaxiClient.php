@@ -262,7 +262,7 @@ class MamTaxiClient
                 throw new \Exception('Failed');
             }
         }
-        for ($i = 15001; $i < 25000; $i++) {
+        for ($i = 30001; $i < 35000; $i++) {
             try {
                 $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
                     'headers' => [
@@ -275,7 +275,7 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'], ['353', '178', '560'])) {
+                if (in_array($data['TaxiNo'], ['178', '560'])) {
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
             }
@@ -286,7 +286,7 @@ class MamTaxiClient
     public function driverStatuses(): array
     {
         $driverUrls = [
-            'https://mamtaxi.pl/api/5550618/Driver/4348/Drivers/4348/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4348/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21914/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4406/Status',
@@ -295,6 +295,10 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4414/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4468/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4532/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29782/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4748/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/30003/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/30753/Status',
         ];
 
         $promises = [];

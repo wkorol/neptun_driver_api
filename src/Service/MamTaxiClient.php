@@ -256,12 +256,13 @@ class MamTaxiClient
 
     public function findDriver(string $id): JsonResponse
     {
+        $driverIds = [];
         if (!$this->isSessionValid()) {
             if (!$this->login()) {
                 throw new \Exception('Failed');
             }
         }
-        for ($i = 16402; $i < 25000; $i++) {
+        for ($i = 15001; $i < 25000; $i++) {
             try {
                 $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
                     'headers' => [
@@ -274,13 +275,12 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if ($data['TaxiNo'] === $id) {
-                    return new JsonResponse($i, 200);
+                if (in_array($data['TaxiNo'], ['353', '178', '560'])) {
+                    $driverIds[] = [$data['TaxiNo'] => $i];
                 }
             }
-
         }
-        return new JsonResponse('Driver didnt found');
+        return new JsonResponse($driverIds);
     }
 
     public function driverStatuses(): array
@@ -290,6 +290,11 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21914/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4406/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25586/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4383/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4414/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4468/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4532/Status',
         ];
 
         $promises = [];

@@ -62,6 +62,9 @@ class OrderProxyController extends AbstractController
         return new JsonResponse('Session expired', 401);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/find-driver/{id}', name: 'check_session')]
     public function findDriver(MamTaxiClient $client, string $id): JsonResponse
     {

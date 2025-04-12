@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use GuzzleHttp\Promise;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 
 class MamTaxiClient

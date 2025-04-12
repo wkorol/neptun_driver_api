@@ -288,7 +288,7 @@ class MamTaxiClient
     public function driverStatuses(): array
     {
         return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
-            $item->expiresAfter(10); // cache na 30 sekund
+            $item->expiresAfter(30); // cache na 30 sekund
             return $this->fetchDriverStatuses();
         });
     }

@@ -288,7 +288,7 @@ class MamTaxiClient
     public function driverStatuses(): array
     {
         return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
-            $item->expiresAfter(30); // cache na 30 sekund
+            $item->expiresAfter(10); // cache na 30 sekund
             return $this->fetchDriverStatuses();
         });
     }
@@ -405,12 +405,14 @@ class MamTaxiClient
                     'TaxiNo' => $data['TaxiNo'] ?? null,
                     'Latitude' => $data['Latitude'] ?? null,
                     'Longitude' => $data['Longitude'] ?? null,
+                    'Status' => $data['Status'] ?? null,
                 ];
             } else {
                 $driversStatus[] = [
                     'TaxiNo' => null,
                     'Latitude' => null,
                     'Longitude' => null,
+                    'Status' => null,
                     'error' => 'Request failed',
                 ];
             }

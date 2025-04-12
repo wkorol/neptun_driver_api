@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use GuzzleHttp\Promise;
+use Symfony\Contracts\Cache\CacheInterface;
 
 
 class MamTaxiClient
@@ -21,7 +22,7 @@ class MamTaxiClient
     private readonly SessionInterface $session;
     private string $baseUrl = 'https://mamtaxi.pl/';
 
-    public function __construct(private RequestStack $requestStack)
+    public function __construct(private RequestStack $requestStack, private CacheInterface $cache)
     {
         $this->session = $requestStack->getSession();
 
@@ -285,6 +286,14 @@ class MamTaxiClient
 
     public function driverStatuses(): array
     {
+        return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
+            $item->expiresAfter(30); // cache na 30 sekund
+            return $this->fetchDriverStatuses();
+        });
+    }
+
+    public function fetchDriverStatuses(): array
+    {
         $driverUrls = [
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4348/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
@@ -405,6 +414,7 @@ class MamTaxiClient
                 ];
             }
         }
+
         return $driversStatus;
     }
 }

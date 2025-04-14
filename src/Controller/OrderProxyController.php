@@ -5,11 +5,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Message\GetDriverStatuses;
 use App\Service\MamTaxiClient;
 use App\Service\OrderImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class OrderProxyController extends AbstractController
@@ -65,7 +67,7 @@ class OrderProxyController extends AbstractController
     /**
      * @throws \Exception
      */
-    #[Route('/find-driver/{id}', name: 'check_session')]
+    #[Route('/find-driver/{id}', name: 'find_driver')]
     public function findDriver(MamTaxiClient $client, string $id): JsonResponse
     {
         return $client->findDriver($id);
@@ -99,12 +101,24 @@ class OrderProxyController extends AbstractController
     }
 
     #[Route('/api/proxy/drivers/status', name: 'proxy_drivers_status')]
-    public function getDriversStatus(MamTaxiClient $client): JsonResponse
+    public function getDriversStatus(MamTaxiClient $client, MessageBusInterface $bus): JsonResponse
     {
-        if (!$client->isSessionValid()) {
-            $client->login();
-        }
-        return $this->json($client->driverStatuses());
+        $bus->dispatch(new GetDriverStatuses());
+
+        return $this->json([
+            'message' => 'Statusy kierowców są przetwarzane w tle. Spróbuj za chwilę pobrać wynik.',
+        ]);
     }
 
+    #[Route('/api/proxy/drivers/status/latest', name: 'proxy_drivers_status_latest')]
+    public function latestDriverStatuses(MamTaxiClient $client): JsonResponse
+    {
+        $data = $client->driverStatuses();
+
+        if ($data === null) {
+            return $this->json(['message' => 'Brak danych w cache'], 202); // 202: Processing
+        }
+
+        return $this->json($data);
+    }
 }

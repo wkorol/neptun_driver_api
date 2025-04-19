@@ -7,28 +7,51 @@ namespace App\Service;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\CookieJarInterface;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use GuzzleHttp\Promise;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 
 class MamTaxiClient
 {
     private readonly Client $httpClient;
     private readonly CookieJarInterface $cookieJar;
-    private readonly SessionInterface $session;
+    private ?SessionInterface $session = null;
     private string $baseUrl = 'https://mamtaxi.pl/';
+    private string $cookieFile = __DIR__ . '/../../var/mam_taxi_cookie_jar.ser';
+    private bool $cliContext = false;
 
-    public function __construct(private RequestStack $requestStack)
-    {
-        $this->session = $requestStack->getSession();
 
-        if ($this->session->has('mam_taxi_cookie_jar')) {
-            $this->cookieJar = unserialize($this->session->get('mam_taxi_cookie_jar'));
+
+    public function __construct(
+        private RequestStack $requestStack,
+        private CacheInterface $cache,
+    ) {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if ($request !== null) {
+            try {
+                if ($request->hasSession()) {
+                    $this->session = $request->getSession();
+                }
+            } catch (SessionNotFoundException) {
+                $this->cliContext = true;
+            }
         } else {
-            $this->cookieJar = new CookieJar(true, []); // persistent cookie jar
+            $this->cliContext = true;
+        }
+
+        if ($this->session && $this->session->has('mam_taxi_cookie_jar')) {
+            $this->cookieJar = unserialize($this->session->get('mam_taxi_cookie_jar'));
+        } elseif (file_exists($this->cookieFile)) {
+            $this->cookieJar = unserialize(file_get_contents($this->cookieFile));
+        } else {
+            $this->cookieJar = new CookieJar(true, []);
         }
 
         $this->httpClient = new Client([
@@ -41,6 +64,7 @@ class MamTaxiClient
             ],
         ]);
     }
+
 
     public function login(): bool
     {
@@ -66,11 +90,15 @@ class MamTaxiClient
             ],
         ]);
 
-
         foreach ($this->cookieJar->toArray() as $cookie) {
             if ($cookie['Name'] === '.AspNet.ApplicationCookie') {
-                $this->requestStack->getSession()->set('mam_taxi_cookie_jar', serialize($this->cookieJar));
-                $this->requestStack->getSession()->save();
+                if ($this->session && $this->session->isStarted()) {
+                    $this->session->set('mam_taxi_cookie_jar', serialize($this->cookieJar));
+                    $this->session->save();
+                }
+
+                file_put_contents($this->cookieFile, serialize($this->cookieJar));
+
                 return true;
             }
         }
@@ -78,10 +106,11 @@ class MamTaxiClient
         return false;
     }
 
-
     public function logout(): void
     {
-        $this->session->remove('mam_taxi_cookie_jar');
+        if ($this->session) {
+            $this->session->remove('mam_taxi_cookie_jar');
+        }
     }
 
     public function isSessionValid(): bool
@@ -96,6 +125,9 @@ class MamTaxiClient
 
             return $response->getStatusCode() === 200;
         } catch (\Throwable) {
+            if ($this->cliContext) {
+                return $this->login();
+            }
             return false;
         }
     }
@@ -287,6 +319,31 @@ class MamTaxiClient
 
     public function driverStatuses(): array
     {
+        return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
+            $item->expiresAfter(30);
+            return []; // ← bezpieczny fallback zamiast null
+        });
+    }
+
+    public function refreshDriverStatuses(): array
+    {
+        $data = $this->fetchDriverStatuses();
+
+        $this->cache->delete('mam_taxi_driver_statuses'); // czyszczę na wszelki wypadek
+
+        $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) use ($data) {
+            $item->expiresAfter(30);
+            return $data;
+        });
+
+        return $data;
+    }
+
+    public function fetchDriverStatuses(): array
+    {
+        if ($this->isSessionValid()) {
+            $this->login();
+        }
         $driverUrls = [
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4348/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
@@ -438,16 +495,19 @@ class MamTaxiClient
                     'TaxiNo' => $data['TaxiNo'] ?? null,
                     'Latitude' => $data['Latitude'] ?? null,
                     'Longitude' => $data['Longitude'] ?? null,
+                    'Status' => $data['Status'] ?? null,
                 ];
             } else {
                 $driversStatus[] = [
                     'TaxiNo' => null,
                     'Latitude' => null,
                     'Longitude' => null,
+                    'Status' => null,
                     'error' => 'Request failed',
                 ];
             }
         }
+
         return $driversStatus;
     }
 }

@@ -308,7 +308,7 @@ class MamTaxiClient
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
                 if (in_array($data['TaxiNo'], [
-
+                    
                 ])) {
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
@@ -347,6 +347,37 @@ class MamTaxiClient
         $driverUrls = [
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4348/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23501/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25821/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/24437/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/17536/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23076/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29621/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4453/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23108/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/24153/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29912/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29914/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25929/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25975/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/26099/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4681/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/24553/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4540/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4739/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4682/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4647/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4621/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4583/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4601/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4564/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4526/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4511/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4454/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4500/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4433/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4389/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4359/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21914/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4406/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25586/Status',
@@ -471,6 +502,8 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29781/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/24134/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4446/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4334/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4354/Status',
         ];
 
         $promises = [];

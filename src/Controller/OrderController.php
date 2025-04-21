@@ -38,10 +38,10 @@ class OrderController extends AbstractController
         return new JsonResponse($this->orderRepository->findActualOrders());
     }
 
-    #[Route('/orders/update-all', name: 'update_all_existing_orders', methods: ['GET'])]
+    #[Route('/orders/update-scheduled', name: 'update_all_existing_orders', methods: ['GET'])]
     public function updateAllExistingOrders(): JsonResponse
     {
-        $orders = $this->orderRepository->findAll();
+        $orders = $this->orderRepository->findScheduledOrdersForToday();
         $updatedCount = 0;
         $batchSize = 100;
 

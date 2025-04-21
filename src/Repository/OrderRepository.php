@@ -58,6 +58,7 @@ class OrderRepository extends ServiceEntityRepository
 
         return $this->createQueryBuilder('o')
             ->where('o.plannedArrivalDate IS NOT NULL')
+            ->andWhere('o.taxiNumber IS NULL')
             ->andWhere('o.status = :status')
             ->andWhere('o.plannedArrivalDate BETWEEN :start AND :end')
             ->andWhere('o.plannedArrivalDate > :oneMinuteAgo')

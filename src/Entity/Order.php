@@ -244,6 +244,7 @@ class Order implements \JsonSerializable
     public function jsonSerialize(): array
     {
        return [
+           'Id' => $this->getExternalId(),
            'CreatedAt' => $this->getCreatedAt(),
            'PlannedArrivalDate' => $this->getPlannedArrivalDate()?->format('Y-m-d\TH:i:sP'),
            'Status' => $this->getStatus()?->toLabel(),

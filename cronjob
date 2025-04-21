@@ -1,7 +1,7 @@
 * * * * * /usr/local/bin/php /var/www/html/bin/console app:update-lump-sums >> /var/log/cron.log 2>&1
 
 * * * * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/api/proxy/import-orders/5 >> /var/log/cron_mamtaxi_import_5.log 2>&1
-* * * * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/orders/update-scheduled >> /var/log/cron_mamtaxi_updatescheduled.log 2>&1
+* * * * * curl -s -X GET https://apineptun-ij5mx.ondigitalocean.app/orders/update/actual >> /var/log/cron_mamtaxi_updatescheduled.log 2>&1
 
 
 

@@ -22,7 +22,6 @@ WORKDIR /var/www/html
 
 # Copy application files and Apache configuration
 COPY . /var/www/html
-RUN chown -R www-data:www-data /var/www/html
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Configure Apache server name

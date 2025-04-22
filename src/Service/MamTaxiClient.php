@@ -320,7 +320,7 @@ class MamTaxiClient
     public function driverStatuses(): array
     {
         return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
-            $item->expiresAfter(30);
+            $item->expiresAfter(60);
             return []; // ← bezpieczny fallback zamiast null
         });
     }

@@ -307,8 +307,7 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'],  [
-                ])) {
+                if (in_array($data['TaxiNo'],  [])) {
 
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
@@ -329,10 +328,10 @@ class MamTaxiClient
     {
         $data = $this->fetchDriverStatuses();
 
-        $this->cache->delete('mam_taxi_driver_statuses'); // czyszczę na wszelki wypadek
+        $this->cache->delete('mam_taxi_driver_statuses');
 
         $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) use ($data) {
-            $item->expiresAfter(30);
+            $item->expiresAfter(60);
             return $data;
         });
 
@@ -349,6 +348,31 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4351/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4735/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4450/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25976/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23140/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/20522/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31417/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/17037/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/28425/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4407/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4596/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4451/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/14343/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/29941/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4476/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23226/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4505/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4510/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4596/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4464/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4600/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4362/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4614/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4437/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4426/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4378/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4400/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/17502/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31472/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/14394/Status',

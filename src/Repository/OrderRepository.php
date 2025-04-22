@@ -120,6 +120,7 @@ class OrderRepository extends ServiceEntityRepository
         $companyName = $data['CompanyName'] ?? null;
         $price = $data['Price'] ?? null;
         $passengerCount = $data['PassengersCount'] ?? null;
+        $paymentMethod = $data['PaymentMethod'] ?? null;
 
         $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
@@ -160,6 +161,11 @@ class OrderRepository extends ServiceEntityRepository
 
             if ($order->getPassengerCount() !== $passengerCount) {
                 $order->setPassengerCount($passengerCount);
+                $changed = true;
+            }
+
+            if ($order->getPaymentMethod() !== $paymentMethod) {
+                $order->setPaymentMethod($paymentMethod);
                 $changed = true;
             }
         } catch (\Exception $e) {

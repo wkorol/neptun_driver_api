@@ -50,6 +50,9 @@ class Order implements \JsonSerializable
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $passengerCount;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $paymentMethod;
+
     /**
      * @param int $externalId
      * @param \DateTimeImmutable $createdAt
@@ -66,8 +69,9 @@ class Order implements \JsonSerializable
      * @param string|null $companyName
      * @param float|null $price
      * @param int|null $passengerCount
+     * @param int|null $paymentMethod
      */
-    public function __construct(int $externalId, \DateTimeImmutable $createdAt, ?\DateTimeImmutable $plannedArrivalDate, int $status, string $city, ?string $street, ?string $house, string $from, ?string $taxiNumber, ?string $destination, ?string $notes, ?string $phoneNumber, ?string $companyName, ?float $price, ?int $passengerCount)
+    public function __construct(int $externalId, \DateTimeImmutable $createdAt, ?\DateTimeImmutable $plannedArrivalDate, int $status, string $city, ?string $street, ?string $house, string $from, ?string $taxiNumber, ?string $destination, ?string $notes, ?string $phoneNumber, ?string $companyName, ?float $price, ?int $passengerCount, ?int $paymentMethod)
     {
         $this->id = Uuid::v4();
         $this->externalId = $externalId;
@@ -85,6 +89,7 @@ class Order implements \JsonSerializable
         $this->companyName = $companyName;
         $this->price = $price;
         $this->passengerCount = $passengerCount;
+        $this->paymentMethod = $paymentMethod;
     }
 
     public function setCity(string $city): void
@@ -240,6 +245,17 @@ class Order implements \JsonSerializable
         $this->plannedArrivalDate = $plannedArrivalDate;
     }
 
+    public function setPaymentMethod(?int $paymentMethod): void
+    {
+        $this->paymentMethod = $paymentMethod;
+    }
+
+    public function getPaymentMethod(): ?int
+    {
+        return $this->paymentMethod;
+    }
+
+
 
     public function jsonSerialize(): array
     {
@@ -259,6 +275,7 @@ class Order implements \JsonSerializable
            'CompanyName' => $this->getCompanyName(),
            'Price' => $this->getPrice(),
            'PassengersCount' => $this->getPassengerCount(),
+           'PaymentMethod' => $this->getPaymentMethod(),
        ];
     }
 }

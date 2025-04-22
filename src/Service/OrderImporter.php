@@ -47,6 +47,7 @@ class OrderImporter
             $companyName = $data['CompanyName'] ?? null;
             $price = $data['Price'] ?? null;
             $passengerCount = $data['PassengersCount'] ?? null;
+            $paymentMethod = $data['PaymentMethod'] ?? null;
 
             try {
                 $order = new Order(
@@ -64,7 +65,8 @@ class OrderImporter
                     phoneNumber: $phoneNumber,
                     companyName: $companyName,
                     price: $price,
-                    passengerCount: $passengerCount
+                    passengerCount: $passengerCount,
+                    paymentMethod: $paymentMethod
                 );
             } catch (\Exception $e) {
                 dd($e->getMessage() . 'External id: ' . $externalId . 'Status: '. $status);

@@ -294,7 +294,7 @@ class MamTaxiClient
                 throw new \Exception('Failed');
             }
         }
-        for ($i = 4000; $i < 35000; $i++) {
+        for ($i = 4000; $i < 5000; $i++) {
             try {
                 $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
                     'headers' => [
@@ -307,7 +307,7 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'],  [])) {
+                if (in_array($data['TaxiNo'],  ["46"])) {
 
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
@@ -349,13 +349,18 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4351/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4735/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4450/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/30567/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4420/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/26257/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/20283/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/24352/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31493/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/28518/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4525/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4350/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4651/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4387/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21347/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/25976/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23140/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/20522/Status',

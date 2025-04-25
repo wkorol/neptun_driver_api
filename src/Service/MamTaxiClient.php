@@ -307,7 +307,7 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'],  ["41"])) {
+                if (in_array($data['TaxiNo'],  ["376"])) {
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
             }
@@ -348,6 +348,12 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4351/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/28483/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23798/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4632/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/28426/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4675/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31556/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/26549/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4653/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21060/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23737/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31089/Status',

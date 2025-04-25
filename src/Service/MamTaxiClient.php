@@ -345,8 +345,10 @@ class MamTaxiClient
         $driverUrls = [
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4348/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/12266/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4351/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/28483/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23798/Status',
+            'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/21060/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/23737/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/31089/Status',
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4577/Status',

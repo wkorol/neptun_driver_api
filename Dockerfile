@@ -9,7 +9,7 @@ RUN apt-get -y update && apt-get -y upgrade && \
     apt-get -y install wget libpq-dev libzip-dev unzip libxml2-dev git bash cron supervisor tzdata && \
     ln -fs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
-    docker-php-ext-install pdo pdo_mysql opcache zip soap intl
+    docker-php-ext-install pdo pdo_pgsql opcache zip soap intl
 
 # Enable Apache modules
 RUN a2enmod rewrite ssl socache_shmcb
@@ -31,23 +31,15 @@ RUN echo "ServerName neptun-api" >> /etc/apache2/conf-available/servername.conf 
 # Install PHP dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
-# Copy the crontab file
-
+# Set PHP timezone config
 RUN echo "date.timezone=Europe/Warsaw" > /usr/local/etc/php/conf.d/timezone.ini
 
+# Copy and set up cron
 COPY cronjob /etc/cron.d/symfony-cron
 RUN chmod 0644 /etc/cron.d/symfony-cron && crontab /etc/cron.d/symfony-cron
 
-# Give execution rights on the cron job file
-RUN chmod 0644 /etc/cron.d/symfony-cron
-
-# Apply the cron job
-RUN crontab /etc/cron.d/symfony-cron
-
 # Copy the entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Make the entrypoint script executable
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set the custom entrypoint

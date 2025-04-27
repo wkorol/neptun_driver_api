@@ -7,6 +7,9 @@ namespace App\Service;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\CookieJarInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -638,31 +641,28 @@ class MamTaxiClient
             'https://mamtaxi.pl/api/5550618/Driver/0/Drivers/4354/Status',
         ];
 
-        $promises = [];
-
-        foreach ($driverUrls as $url) {
-            $promises[] = $this->httpClient->getAsync($url, [
-                'headers' => [
+        $driversStatus = [];
+        $requests = function ($driverUrls) {
+            foreach ($driverUrls as $url) {
+                yield new Request('GET', $url, [
                     'X-Requested-With' => 'XMLHttpRequest',
                     'Referer' => $this->baseUrl,
-                ],
-            ]);
-        }
+                ]);
+            }
+        };
 
-        $responses = \GuzzleHttp\Promise\Utils::settle($promises)->wait();
-
-        $driversStatus = [];
-
-        foreach ($responses as $response) {
-            if ($response['state'] === 'fulfilled') {
-                $data = json_decode($response['value']->getBody()->getContents(), true);
+        $pool = new Pool($this->httpClient, $requests($driverUrls), [
+            'concurrency' => 20,
+            'fulfilled' => function ($response, $index) use (&$driversStatus, $driverUrls) {
+                $data = json_decode($response->getBody()->getContents(), true);
                 $driversStatus[] = [
                     'TaxiNo' => $data['TaxiNo'] ?? null,
                     'Latitude' => $data['Latitude'] ?? null,
                     'Longitude' => $data['Longitude'] ?? null,
                     'Status' => $data['Status'] ?? null,
                 ];
-            } else {
+            },
+            'rejected' => function (RequestException $reason, $index) use (&$driversStatus, $driverUrls) {
                 $driversStatus[] = [
                     'TaxiNo' => null,
                     'Latitude' => null,
@@ -670,8 +670,12 @@ class MamTaxiClient
                     'Status' => null,
                     'error' => 'Request failed',
                 ];
-            }
-        }
+            },
+        ]);
+
+        // Start!
+        $promise = $pool->promise();
+        $promise->wait();
 
         return $driversStatus;
     }

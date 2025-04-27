@@ -101,12 +101,12 @@ class OrderProxyController extends AbstractController
     }
 
     #[Route('/api/proxy/drivers/status', name: 'proxy_drivers_status')]
-    public function getDriversStatus(MamTaxiClient $client, MessageBusInterface $bus): JsonResponse
+    public function getDriversStatus(MamTaxiClient $client): JsonResponse
     {
-        $bus->dispatch(new GetDriverStatuses());
+        $client->refreshDriverStatuses();
 
         return $this->json([
-            'message' => 'Statusy kierowców są przetwarzane w tle. Spróbuj za chwilę pobrać wynik.',
+            'message' => 'Statusy przetworzone',
         ]);
     }
 

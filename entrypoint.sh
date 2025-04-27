@@ -35,8 +35,5 @@ fi
 echo "Running Doctrine migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction
 
-# Start Messenger consumer in background
-php bin/console messenger:consume async --memory-limit=128M --no-interaction &
-
 # Start Apache
 exec "$@"

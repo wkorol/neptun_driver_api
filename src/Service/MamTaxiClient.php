@@ -322,7 +322,7 @@ class MamTaxiClient
     {
         return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
             $item->expiresAfter(60);
-            return []; // ← bezpieczny fallback zamiast null
+            return []; // fallback
         });
     }
 
@@ -330,12 +330,9 @@ class MamTaxiClient
     {
         $data = $this->fetchDriverStatuses();
 
-        $this->cache->delete('mam_taxi_driver_statuses');
-
-        $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) use ($data) {
-            $item->expiresAfter(60);
-            return $data;
-        });
+        $item = $this->cache->getItem('mam_taxi_driver_statuses');
+        $item->set($data)->expiresAfter(60);
+        $this->cache->save($item);
 
         return $data;
     }

@@ -121,4 +121,12 @@ class OrderProxyController extends AbstractController
 
         return $this->json($data);
     }
+
+    #[Route('/fetch_statuses', name: 'statuses')]
+    public function fetchDriverStatuses(MamTaxiClient $client): JsonResponse
+    {
+        $data = $client->fetchDriverStatuses();
+        return $this->json($data);
+    }
+
 }

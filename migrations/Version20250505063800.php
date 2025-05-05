@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241106062214 extends AbstractMigration
+final class Version20250505063800 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,13 +20,22 @@ final class Version20241106062214 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE lump_sums (id BINARY(16) NOT NULL COMMENT \'(DC2Type:uuid)\', name VARCHAR(255) NOT NULL, fixed_values JSON NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql(<<<'SQL'
+            CREATE TABLE "user" (id UUID NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, roles JSON NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON "user" (email)
+        SQL);
+        $this->addSql(<<<'SQL'
+            COMMENT ON COLUMN "user".id IS '(DC2Type:uuid)'
+        SQL);
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE lump_sums');
+        $this->addSql(<<<'SQL'
+            DROP TABLE "user"
+        SQL);
     }
 
     public function isTransactional(): bool

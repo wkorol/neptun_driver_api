@@ -10,7 +10,7 @@ class Tariff implements \JsonSerializable
         private readonly TariffType $tariffType,
         private readonly int        $carValue,
         private readonly int $bus5_6Value,
-        private readonly int $bus7_8Value,
+        private readonly ?int $bus7_8Value,
     )
     {
     }

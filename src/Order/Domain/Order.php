@@ -1,0 +1,122 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Domain;
+
+use App\DTO\Status;
+use Symfony\Component\Uid\Uuid;
+
+class Order implements \JsonSerializable
+{
+    private Uuid $id;
+    private int $externalId;
+    private \DateTimeImmutable $createdAt;
+    private ?\DateTimeImmutable $plannedArrivalDate = null;
+    private ?int $status;
+    private string $city;
+    private ?string $street;
+    private ?string $house;
+    private string $from;
+    private ?string $taxiNumber;
+    private ?string $destination;
+    private ?string $notes;
+    private ?string $phoneNumber;
+    private ?string $companyName;
+    private ?float $price;
+    private ?int $passengerCount;
+    private ?int $paymentMethod;
+
+    public function __construct(
+        int $externalId,
+        \DateTimeImmutable $createdAt,
+        ?\DateTimeImmutable $plannedArrivalDate,
+        int $status,
+        string $city,
+        ?string $street,
+        ?string $house,
+        string $from,
+        ?string $taxiNumber,
+        ?string $destination,
+        ?string $notes,
+        ?string $phoneNumber,
+        ?string $companyName,
+        ?float $price,
+        ?int $passengerCount,
+        ?int $paymentMethod
+    ) {
+        $this->id = Uuid::v4();
+        $this->externalId = $externalId;
+        $this->createdAt = $createdAt;
+        $this->plannedArrivalDate = $plannedArrivalDate;
+        $this->status = $status;
+        $this->city = $city;
+        $this->street = $street;
+        $this->house = $house;
+        $this->from = $from;
+        $this->taxiNumber = $taxiNumber;
+        $this->destination = $destination;
+        $this->notes = $notes;
+        $this->phoneNumber = $phoneNumber;
+        $this->companyName = $companyName;
+        $this->price = $price;
+        $this->passengerCount = $passengerCount;
+        $this->paymentMethod = $paymentMethod;
+    }
+
+    public function getId(): Uuid { return $this->id; }
+    public function getExternalId(): int { return $this->externalId; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function getPlannedArrivalDate(): ?\DateTimeImmutable { return $this->plannedArrivalDate; }
+    public function getStatus(): ?Status { return $this->status !== null ? Status::tryFrom($this->status) : null; }
+    public function getCity(): string { return $this->city; }
+    public function getStreet(): ?string { return $this->street; }
+    public function getHouse(): ?string { return $this->house; }
+    public function getFrom(): string { return $this->from; }
+    public function getTaxiNumber(): ?string { return $this->taxiNumber; }
+    public function getDestination(): ?string { return $this->destination; }
+    public function getNotes(): ?string { return $this->notes; }
+    public function getPhoneNumber(): ?string { return $this->phoneNumber; }
+    public function getCompanyName(): ?string { return $this->companyName; }
+    public function getPrice(): ?float { return $this->price; }
+    public function getPassengerCount(): ?int { return $this->passengerCount; }
+    public function getPaymentMethod(): ?int { return $this->paymentMethod; }
+
+    public function setCity(string $city): void { $this->city = $city; }
+    public function setStreet(?string $street): void { $this->street = $street; }
+    public function setHouse(?string $house): void { $this->house = $house; }
+    public function setFrom(string $from): void { $this->from = $from; }
+    public function setTaxiNumber(?string $taxiNumber): void { $this->taxiNumber = $taxiNumber; }
+    public function setDestination(?string $destination): void { $this->destination = $destination; }
+    public function setNotes(?string $notes): void { $this->notes = $notes; }
+    public function setPhoneNumber(?string $phoneNumber): void { $this->phoneNumber = $phoneNumber; }
+    public function setCompanyName(?string $companyName): void { $this->companyName = $companyName; }
+    public function setPrice(?float $price): void { $this->price = $price; }
+    public function setPassengerCount(?int $passengerCount): void { $this->passengerCount = $passengerCount; }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): void { $this->createdAt = $createdAt; }
+    public function setStatus(?int $status): void { $this->status = $status; }
+    public function setArrivalDate(?\DateTimeImmutable $plannedArrivalDate): void { $this->plannedArrivalDate = $plannedArrivalDate; }
+    public function setPaymentMethod(?int $paymentMethod): void { $this->paymentMethod = $paymentMethod; }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'Id' => $this->getExternalId(),
+            'CreatedAt' => $this->getCreatedAt(),
+            'PlannedArrivalDate' => $this->getPlannedArrivalDate()?->format('Y-m-d\TH:i:sP'),
+            'Status' => $this->getStatus()?->toLabel(),
+            'City' => $this->getCity(),
+            'Street' => $this->getStreet(),
+            'House' => $this->getHouse(),
+            'From' => $this->getFrom(),
+            'TaxiNumber' => $this->getTaxiNumber(),
+            'Destination' => $this->getDestination(),
+            'Notes' => $this->getNotes(),
+            'PhoneNumber' => $this->getPhoneNumber(),
+            'CompanyName' => $this->getCompanyName(),
+            'Price' => $this->getPrice(),
+            'PassengersCount' => $this->getPassengerCount(),
+            'PaymentMethod' => $this->getPaymentMethod(),
+        ];
+    }
+}

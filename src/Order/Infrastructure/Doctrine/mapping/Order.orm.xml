@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://raw.githubusercontent.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+
+    <entity name="App\Order\Domain\Order" table="`order`">
+        <id name="id" type="uuid" column="id">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="externalId" column="external_id" type="integer" unique="true" />
+        <field name="createdAt" column="created_at" type="datetime_immutable" />
+        <field name="plannedArrivalDate" column="planned_arrival_date" type="datetime_immutable" nullable="true" />
+        <field name="status" column="status" type="integer" nullable="true" />
+        <field name="city" column="city" type="string" />
+        <field name="street" column="street" type="string" nullable="true" />
+        <field name="house" column="house" type="string" nullable="true" />
+        <field name="from" column="`from`" type="string" />
+        <field name="taxiNumber" column="taxi_number" type="string" nullable="true" />
+        <field name="destination" column="destination" type="string" nullable="true" />
+        <field name="notes" column="notes" type="string" nullable="true" />
+        <field name="phoneNumber" column="phone_number" type="string" nullable="true" />
+        <field name="companyName" column="company_name" type="string" nullable="true" />
+        <field name="price" column="price" type="float" nullable="true" />
+        <field name="passengerCount" column="passenger_count" type="integer" nullable="true" />
+        <field name="paymentMethod" column="payment_method" type="integer" nullable="true" />
+    </entity>
+
+</doctrine-mapping>

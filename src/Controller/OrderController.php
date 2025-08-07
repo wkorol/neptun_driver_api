@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-
 namespace App\Controller;
 
-use App\Entity\Order;
-use App\Repository\OrderRepository;
+use App\Order\Repository\OrderRepository;
 use App\Service\MamTaxiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

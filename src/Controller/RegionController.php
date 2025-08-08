@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Region;
+use App\Project\UseCase\AddRegion;
+use App\Project\UseCase\AddRegionHandler;
+use App\Project\UseCase\EditRegion;
+use App\Project\UseCase\EditRegionHandler;
+use App\Project\UseCase\RemoveRegion;
+use App\Project\UseCase\RemoveRegionHandler;
 use App\Region\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +21,9 @@ class RegionController extends AbstractController
 {
     public function __construct(
         private readonly RegionRepository $regionRepository,
+        private readonly AddRegionHandler $addRegionHandler,
+        private readonly EditRegionHandler $editRegionHandler,
+        private readonly RemoveRegionHandler $removeRegionHandler,
     ) {
     }
 
@@ -40,13 +48,11 @@ class RegionController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $region = new Region(
-            $data['id'],
-            $data['name']
-        );
-
         try {
-            $this->regionRepository->addRegion($region);
+            $region = $this->addRegionHandler->__invoke(new AddRegion\Command(
+                (int) $data['id'],
+                $data['name'],
+            ));
         } catch (\PDOException $exception) {
             return $this->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
@@ -64,14 +70,17 @@ class RegionController extends AbstractController
     public function editRegion(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $this->regionRepository->editRegion($id, $data);
+        $this->editRegionHandler->__invoke(new EditRegion\Command(
+            $id,
+            $data['name']
+        ));
         return $this->json(['message' => 'Rejon zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
     #[Route('/region/{id}/delete', name: 'remove_region', methods: ['DELETE'])]
     public function removeRegion(int $id): JsonResponse
     {
-        $this->regionRepository->removeRegion($id);
+        $this->removeRegionHandler->__invoke(new RemoveRegion\Command($id));
         return $this->json(['message' => 'Rejon o id '. $id . 'został usunięty.'], Response::HTTP_OK);
     }
 }

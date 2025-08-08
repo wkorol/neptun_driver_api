@@ -33,38 +33,7 @@ readonly class ORMLumpSumsRepository implements LumpSumsRepository
 
     public function addLumpSums(LumpSums $fixedPrice): void
     {
-        if ($this->entityManager->getRepository(LumpSums::class)->find($fixedPrice->getId()) !== null) {
-            throw new \PDOException('Ryczałty o podanym ID już istnieją.');
-        }
         $this->entityManager->persist($fixedPrice);
-        $this->entityManager->flush();
-    }
-
-    public function removeLumpSums(Uuid $id): void
-    {
-        $lumpSums = $this->entityManager->getRepository(LumpSums::class)->findOneBy(['id' => $id]);
-        $this->entityManager->remove($lumpSums);
-        $this->entityManager->flush();
-    }
-
-    public function updateLumpSums(LumpSums $existingLumpSums, array $data): void
-    {
-        if (isset($data['name'])) {
-            $existingLumpSums->setName($data['name']);
-        }
-
-        if (isset($data['fixedValues'])) {
-            $fixedValues = array_map(
-                fn($valueData) => new FixedPrice(
-                    $valueData['name'],
-                    Tariff::fromArray($valueData['tariff1']),
-                    Tariff::fromArray($valueData['tariff2'])
-                ),
-                $data['fixedValues']
-            );
-            $existingLumpSums->setFixedValues($fixedValues);
-        }
-
         $this->entityManager->flush();
     }
 }

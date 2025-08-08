@@ -13,7 +13,6 @@ interface RegionRepository
      */
     public function all(): array;
     public function findById(int $id): ?Region;
-    public function addRegion(Region $region): void;
-    public function removeRegion(int $id): void;
-    public function editRegion(int $id, mixed $data): void;
+    public function add(Region $region): void;
+    public function remove(int $id): void;
 }

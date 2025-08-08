@@ -5,69 +5,37 @@ declare(strict_types=1);
 namespace App\Order\Domain;
 
 use App\DTO\Status;
+use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
 class Order implements \JsonSerializable
 {
-    private Uuid $id;
-    private int $externalId;
-    private \DateTimeImmutable $createdAt;
-    private ?\DateTimeImmutable $plannedArrivalDate = null;
-    private ?int $status;
-    private string $city;
-    private ?string $street;
-    private ?string $house;
-    private string $from;
-    private ?string $taxiNumber;
-    private ?string $destination;
-    private ?string $notes;
-    private ?string $phoneNumber;
-    private ?string $companyName;
-    private ?float $price;
-    private ?int $passengerCount;
-    private ?int $paymentMethod;
-
     public function __construct(
-        int $externalId,
-        \DateTimeImmutable $createdAt,
-        ?\DateTimeImmutable $plannedArrivalDate,
-        int $status,
-        string $city,
-        ?string $street,
-        ?string $house,
-        string $from,
-        ?string $taxiNumber,
-        ?string $destination,
-        ?string $notes,
-        ?string $phoneNumber,
-        ?string $companyName,
-        ?float $price,
-        ?int $passengerCount,
-        ?int $paymentMethod
+        private Uuid               $id,
+        private int                $externalId,
+        private DateTimeImmutable  $createdAt,
+        private ?DateTimeImmutable $plannedArrivalDate,
+        private int                $status,
+        private string             $city,
+        private ?string            $street,
+        private ?string            $house,
+        private string             $from,
+        private ?string            $taxiNumber,
+        private ?string            $destination,
+        private ?string            $notes,
+        private ?string            $phoneNumber,
+        private ?string            $companyName,
+        private ?float $price,
+        private ?int $passengerCount,
+        private ?int $paymentMethod
     ) {
-        $this->id = Uuid::v4();
-        $this->externalId = $externalId;
-        $this->createdAt = $createdAt;
-        $this->plannedArrivalDate = $plannedArrivalDate;
-        $this->status = $status;
-        $this->city = $city;
-        $this->street = $street;
-        $this->house = $house;
-        $this->from = $from;
-        $this->taxiNumber = $taxiNumber;
-        $this->destination = $destination;
-        $this->notes = $notes;
-        $this->phoneNumber = $phoneNumber;
-        $this->companyName = $companyName;
-        $this->price = $price;
-        $this->passengerCount = $passengerCount;
-        $this->paymentMethod = $paymentMethod;
+
     }
 
     public function getId(): Uuid { return $this->id; }
     public function getExternalId(): int { return $this->externalId; }
-    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
-    public function getPlannedArrivalDate(): ?\DateTimeImmutable { return $this->plannedArrivalDate; }
+    public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
+    public function getPlannedArrivalDate(): ?DateTimeImmutable { return $this->plannedArrivalDate; }
     public function getStatus(): ?Status { return $this->status !== null ? Status::tryFrom($this->status) : null; }
     public function getCity(): string { return $this->city; }
     public function getStreet(): ?string { return $this->street; }
@@ -93,9 +61,9 @@ class Order implements \JsonSerializable
     public function setCompanyName(?string $companyName): void { $this->companyName = $companyName; }
     public function setPrice(?float $price): void { $this->price = $price; }
     public function setPassengerCount(?int $passengerCount): void { $this->passengerCount = $passengerCount; }
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void { $this->createdAt = $createdAt; }
+    public function setCreatedAt(DateTimeImmutable $createdAt): void { $this->createdAt = $createdAt; }
     public function setStatus(?int $status): void { $this->status = $status; }
-    public function setArrivalDate(?\DateTimeImmutable $plannedArrivalDate): void { $this->plannedArrivalDate = $plannedArrivalDate; }
+    public function setArrivalDate(?DateTimeImmutable $plannedArrivalDate): void { $this->plannedArrivalDate = $plannedArrivalDate; }
     public function setPaymentMethod(?int $paymentMethod): void { $this->paymentMethod = $paymentMethod; }
 
     public function jsonSerialize(): array

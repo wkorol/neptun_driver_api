@@ -12,7 +12,5 @@ interface LumpSumsRepository
     public function all(): array;
     public function find(Uuid $id): ?LumpSums;
     public function addLumpSums(LumpSums $fixedPrice): void;
-    public function removeLumpSums(Uuid $id): void;
-    public function updateLumpSums(LumpSums $existingLumpSums, array $data): void;
 
 }

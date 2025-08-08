@@ -25,28 +25,16 @@ readonly class ORMRegionRepository implements RegionRepository
         return $this->entityManager->getRepository(Region::class)->findOneBy(['id' => $id]);
     }
 
-    public function addRegion(Region $region): void
+    public function add(Region $region): void
     {
-        if ($this->entityManager->getRepository(Region::class)->find($region->getId()) !== null) {
-            throw new \PDOException('Rejon o podanym ID już istnieje.');
-        }
         $this->entityManager->persist($region);
         $this->entityManager->flush();
     }
 
-    public function removeRegion(int $id): void
+    public function remove(int $id): void
     {
         $region = $this->entityManager->getRepository(Region::class)->findOneBy(['id' => $id]);
         $this->entityManager->remove($region);
-        $this->entityManager->flush();
-    }
-
-    public function editRegion(int $id, mixed $data): void
-    {
-        $region = $this->entityManager->getRepository(Region::class)->findOneBy(['id' => $id]);
-        if ($region) {
-            $region->setName($data['name']);
-        }
         $this->entityManager->flush();
     }
 }

@@ -8,10 +8,10 @@ use App\Order\Domain\Order;
 
 interface OrderRepository
 {
-    public function addOrder(Order $order): void;
     public function findActualOrders(): ?array;
+    public function findByExternalId(int $externalId): ?Order;
     public function findScheduledOrdersForToday(): ?array;
     public function findScheduledOrdersForNext5Days(): ?array;
-    public function updateOrder(Order $order, array $data): bool;
     public function deleteAllFinished(): void;
+    public function save(Order $order): void;
 }

@@ -5,16 +5,17 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\DTO\Status;
-use App\Entity\Order;
-use App\Repository\OrderRepository;
+use App\Order\Domain\Order;
+use App\Order\Repository\OrderRepository;
+use App\Project\UseCase\AddOrder\Command;
+use App\Project\UseCase\AddOrderHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
 
 class OrderImporter
 {
-    public function __construct(private EntityManagerInterface $em, private OrderRepository $orderRepository) {
+    public function __construct(private EntityManagerInterface $entityManager, private AddOrderHandler $addOrderHandler) {
 
     }
 
@@ -41,7 +42,6 @@ class OrderImporter
                 continue;
             }
 
-            // Add 1 hour
             $createdAtPlusTwoHour = $createdAt?->modify('+2 hour');
             $plannedArrivalDatePlusTwoHour = $plannedArrivalDate?->modify('+2 hour');
             $companyName = $data['CompanyName'] ?? null;
@@ -51,6 +51,7 @@ class OrderImporter
 
             try {
                 $order = new Order(
+                    id: Uuid::v4(),
                     externalId: $externalId,
                     createdAt: $createdAtPlusTwoHour,
                     plannedArrivalDate: $plannedArrivalDatePlusTwoHour,
@@ -74,13 +75,15 @@ class OrderImporter
 
 
             try {
-                $this->orderRepository->addOrder($order);
+                $this->addOrderHandler->__invoke(new Command(
+                    $order
+                ));
             } catch (\PDOException $exception) {
                 continue;
             }
         }
 
-        $this->em->flush();
-        $this->em->clear();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
     }
 }

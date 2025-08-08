@@ -8,27 +8,12 @@ use App\Order\Domain\Order;
 use App\Order\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ORMOrderRepository implements OrderRepository
+readonly class ORMOrderRepository implements OrderRepository
 {
 
     public function __construct(
         private EntityManagerInterface $entityManager
     ) {
-    }
-
-    public function addOrder(Order $order): void
-    {
-        /**
-         * @var Order|null $existing
-         */
-        $existing = $this->entityManager->getRepository(Order::class)->findOneBy(['externalId' => $order->getExternalId()]);
-
-        if ($existing) {
-            $this->updateOrder($existing, $order->jsonSerialize());
-            return;
-        }
-
-        $this->entityManager->persist($order);
     }
 
     public function findActualOrders(): ?array
@@ -66,7 +51,7 @@ class ORMOrderRepository implements OrderRepository
         $start = new \DateTimeImmutable('tomorrow 00:00:00');
         $end = (new \DateTimeImmutable('today'))->modify('+5 days')->setTime(23, 59, 59);
 
-        return $this->$this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+        return $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
             ->where('o.plannedArrivalDate IS NOT NULL')
             ->andWhere('o.status = :status')
             ->andWhere('o.plannedArrivalDate BETWEEN :start AND :end')
@@ -79,78 +64,6 @@ class ORMOrderRepository implements OrderRepository
             ->getResult();
     }
 
-    public function updateOrder(Order $order, array $data): bool
-    {
-        $changed = false;
-
-        $plannedArrivalDate = isset($data['PlannedArrivalDate']) ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null;
-
-        $status = $data['Status'];
-        if (is_string($status)) {
-            return false;
-        }
-
-        $notes = $data['Notes'] ?? null;
-        $phoneNumber = $data['PhoneNumber'] ?? null;
-        $companyName = $data['CompanyName'] ?? null;
-        $price = $data['Price'] ?? null;
-        $passengerCount = $data['PassengersCount'] ?? null;
-        $paymentMethod = $data['PaymentMethod'] ?? null;
-
-        $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
-
-        try {
-            if (
-                $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
-            ) {
-                $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
-                $changed = true;
-            }
-
-            if ($order->getStatus()?->value) {
-                if ($order->getStatus()->value !== $status) {
-                    $order->setStatus($status);
-                    $changed = true;
-                }
-            }
-
-            if ($order->getNotes() !== $notes) {
-                $order->setNotes($notes);
-                $changed = true;
-            }
-
-            if ($order->getPhoneNumber() !== $phoneNumber) {
-                $order->setPhoneNumber($phoneNumber);
-                $changed = true;
-            }
-
-            if ($order->getCompanyName() !== $companyName) {
-                $order->setCompanyName($companyName);
-                $changed = true;
-            }
-
-            if ($order->getPrice() !== $price) {
-                $order->setPrice($price);
-                $changed = true;
-            }
-
-            if ($order->getPassengerCount() !== $passengerCount) {
-                $order->setPassengerCount($passengerCount);
-                $changed = true;
-            }
-
-            if ($order->getPaymentMethod() !== $paymentMethod) {
-                $order->setPaymentMethod($paymentMethod);
-                $changed = true;
-            }
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
-
-
-        return $changed;
-    }
-
     public function deleteAllFinished(): void
     {
         $qb = $this->$this->entityManager->getRepository(Order::class)->createQueryBuilder('o');
@@ -159,5 +72,16 @@ class ORMOrderRepository implements OrderRepository
             ->where($qb->expr()->in('o.status', [8, 12, 7]));
 
         $qb->getQuery()->execute();
+    }
+
+    public function findByExternalId(int $externalId): ?Order
+    {
+        return $this->entityManager->getRepository(Order::class)->findOneBy(['externalId' => $externalId]);
+    }
+
+    public function save(Order $order): void
+    {
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
     }
 }

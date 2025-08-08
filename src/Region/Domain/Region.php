@@ -15,10 +15,10 @@ class Region implements \JsonSerializable
      * @param Collection<int, Hotel> $hotels
      */
     public function __construct(
-        private readonly ?int       $id,
+        private ?int       $id,
         private ?string             $name,
         private ?int                $position = null,
-        private readonly Collection $hotels = new ArrayCollection(),
+        private Collection $hotels = new ArrayCollection(),
     ) {}
 
     public function getId(): ?int

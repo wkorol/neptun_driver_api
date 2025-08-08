@@ -9,8 +9,12 @@ use Symfony\Component\Uid\Uuid;
 
 interface LumpSumsRepository
 {
+    /**
+     * @return LumpSums[]
+     */
     public function all(): array;
-    public function find(Uuid $id): ?LumpSums;
-    public function addLumpSums(LumpSums $fixedPrice): void;
 
+    public function find(Uuid $id): ?LumpSums;
+
+    public function addLumpSums(LumpSums $fixedPrice): void;
 }

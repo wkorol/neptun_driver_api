@@ -2,28 +2,25 @@
 
 declare(strict_types=1);
 
-
 namespace App\Service;
 
 use App\Order\Domain\Order;
-use App\Order\Repository\OrderRepository;
 use App\Project\UseCase\AddOrder\Command;
 use App\Project\UseCase\AddOrderHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
-
 class OrderImporter
 {
-    public function __construct(private EntityManagerInterface $entityManager, private AddOrderHandler $addOrderHandler) {
-
+    public function __construct(private EntityManagerInterface $entityManager, private AddOrderHandler $addOrderHandler)
+    {
     }
 
     public function importFromArray(array $orders): void
     {
         foreach ($orders as $data) {
             $externalId = $data['Id'] ?? null;
-            if ($externalId === null) {
+            if (null === $externalId) {
                 continue;
             }
 
@@ -70,9 +67,8 @@ class OrderImporter
                     paymentMethod: $paymentMethod
                 );
             } catch (\Exception $e) {
-                dd($e->getMessage() . 'External id: ' . $externalId . 'Status: '. $status);
+                dd($e->getMessage().'External id: '.$externalId.'Status: '.$status);
             }
-
 
             try {
                 $this->addOrderHandler->__invoke(new Command(

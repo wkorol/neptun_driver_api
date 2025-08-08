@@ -17,7 +17,8 @@ readonly class UpdateOrderHandler
     public function __construct(
         private OrderRepository $orderRepository,
         private EntityManagerInterface $entityManager,
-    ) {}
+    ) {
+    }
 
     public function __invoke(Command $command): bool
     {
@@ -30,9 +31,7 @@ readonly class UpdateOrderHandler
 
         $changed = false;
 
-        $plannedArrivalDate = $command->plannedArrivalDate
-            ? new \DateTimeImmutable($command->plannedArrivalDate)
-            : null;
+        $plannedArrivalDate = $command->plannedArrivalDate ?? null;
         $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
         if (
@@ -80,6 +79,7 @@ readonly class UpdateOrderHandler
         if ($changed) {
             $this->entityManager->flush();
         }
+
         return $changed;
     }
 }

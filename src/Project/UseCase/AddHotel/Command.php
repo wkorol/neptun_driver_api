@@ -9,7 +9,7 @@ use App\Hotel\Domain\Hotel;
 readonly class Command
 {
     public function __construct(
-        public Hotel $hotel
+        public Hotel $hotel,
     ) {
     }
 }

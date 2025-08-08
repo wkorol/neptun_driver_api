@@ -10,15 +10,24 @@ use App\Project\UseCase\UpdateHotel\Command;
 use App\Region\Domain\Region;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-type HotelUpdateDataArray array{
+ *     name: ?string,
+ *     regionId: ?int,
+ *     lumpSumsId: ?string,
+ *     lumpSumsExpireDate: ?\DateTimeImmutable,
+ *     newLumpSumsId: ?Uuid
+ * }
+ */
 #[AsMessageHandler]
 readonly class UpdateHotelHandler
 {
     public function __construct(
-        private HotelRepository        $hotelRepository,
-        private EntityManagerInterface $entityManager
-    )
-    {
+        private HotelRepository $hotelRepository,
+        private EntityManagerInterface $entityManager,
+    ) {
     }
 
     public function __invoke(Command $command): void
@@ -27,7 +36,7 @@ readonly class UpdateHotelHandler
         $data = $command->data;
 
         if (!$existingHotel) {
-            throw new \PDOException("Hotel nieznaleziony.");
+            throw new \PDOException('Hotel nieznaleziony.');
         }
         if (isset($data['name'])) {
             if (!$this->hotelRepository->checkIfExists($data['name'])) {
@@ -59,6 +68,5 @@ readonly class UpdateHotelHandler
         $existingHotel->updateUpdateDate();
 
         $this->entityManager->flush();
-
     }
 }

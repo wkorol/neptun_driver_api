@@ -12,13 +12,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class AddLumpSumsHandler
 {
     public function __construct(
-        private LumpSumsRepository $lumpSumsRepository
+        private LumpSumsRepository $lumpSumsRepository,
     ) {
     }
 
     public function __invoke(Command $command): void
     {
-        if ($this->lumpSumsRepository->find($command->lumpSums->getId()) !== null) {
+        if (null !== $this->lumpSumsRepository->find($command->lumpSums->getId())) {
             throw new \PDOException('Ryczałty o podanym ID już istnieją.');
         }
         $this->lumpSumsRepository->addLumpSums($command->lumpSums);

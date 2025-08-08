@@ -12,7 +12,7 @@ use Symfony\Component\Uid\Uuid;
 readonly class ORMHotelRepository implements HotelRepository
 {
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -63,5 +63,4 @@ readonly class ORMHotelRepository implements HotelRepository
 
         return false;
     }
-
 }

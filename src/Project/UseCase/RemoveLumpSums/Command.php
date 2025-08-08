@@ -9,7 +9,7 @@ use Symfony\Component\Uid\Uuid;
 readonly class Command
 {
     public function __construct(
-        public Uuid $id
+        public Uuid $id,
     ) {
     }
 }

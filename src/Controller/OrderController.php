@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Order\Repository\OrderRepository;
+use App\Project\UseCase\DeleteAllFinishedOrdersHandler;
+use App\Project\UseCase\UpdateOrder\Command;
+use App\Project\UseCase\DeleteAllFinishedOrders;
+use App\Project\UseCase\UpdateOrderHandler;
 use App\Service\MamTaxiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +18,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderController extends AbstractController
 {
-    public function __construct(private OrderRepository $orderRepository, private MamTaxiClient $mamTaxiClient, private EntityManagerInterface $em)
+    public function __construct(
+        private OrderRepository $orderRepository,
+        private MamTaxiClient $mamTaxiClient,
+        private EntityManagerInterface $entityManager,
+        private UpdateOrderHandler $updateOrderHandler,
+        private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler
+    )
     {
     }
 
@@ -39,10 +49,10 @@ class OrderController extends AbstractController
     #[Route('/orders/update/actual', name: 'update_all_existing_orders', methods: ['GET'])]
     public function updateAllExistingOrders(): JsonResponse
     {
-        $orders1 = $this->orderRepository->findScheduledOrdersForToday();
-        $orders2 = $this->orderRepository->findScheduledOrdersForNext5Days();
-        $orders3 = $this->orderRepository->findActualOrders();
-        $orders = array_merge($orders1, $orders2, $orders3);
+        $scheduledOrdersForToday = $this->orderRepository->findScheduledOrdersForToday();
+        $ordersForNext5Days = $this->orderRepository->findScheduledOrdersForNext5Days();
+        $actualOrders = $this->orderRepository->findActualOrders();
+        $orders = array_merge($scheduledOrdersForToday, $ordersForNext5Days, $actualOrders);
         $updatedCount = 0;
         $batchSize = 100;
 
@@ -52,13 +62,23 @@ class OrderController extends AbstractController
                 foreach ($chunk as $order) {
                     $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId());
 
-                    if ($this->orderRepository->updateOrder($order, $data)) {
+                    if ($this->updateOrderHandler->__invoke(new Command(
+                        $data['Id'],
+                        $data['PlannedArrivalDate'],
+                        $data['Status'],
+                        $data['Notes'],
+                        $data['PhoneNumber'],
+                        $data['CompanyName'],
+                        $data['Price'],
+                        $data['PassengersCount'],
+                        $data['PaymentMethod'],
+                    ))) {
                         $updatedCount++;
                     }
                 }
 
-                $this->em->flush();
-                $this->em->clear();
+                $this->entityManager->flush();
+                $this->entityManager->clear();
             }
         }
 
@@ -68,7 +88,7 @@ class OrderController extends AbstractController
     #[Route('/orders/delete-all-finished', name: 'delete_all_finished', methods: ['GET'])]
     public function deleteAllFinished(): JsonResponse
     {
-        $this->orderRepository->deleteAllFinished();
+        $this->deleteAllFinishedOrdersHandler->__invoke(new DeleteAllFinishedOrders\Command());
 
         return new JsonResponse("Deleted finished orders");
     }

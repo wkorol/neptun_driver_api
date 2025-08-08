@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Order\Repository\OrderRepository;
+use App\Project\UseCase\DeleteAllFinishedOrders;
 use App\Project\UseCase\DeleteAllFinishedOrdersHandler;
 use App\Project\UseCase\UpdateOrder\Command;
-use App\Project\UseCase\DeleteAllFinishedOrders;
 use App\Project\UseCase\UpdateOrderHandler;
 use App\Service\MamTaxiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-
 
 class OrderController extends AbstractController
 {
@@ -23,9 +22,8 @@ class OrderController extends AbstractController
         private MamTaxiClient $mamTaxiClient,
         private EntityManagerInterface $entityManager,
         private UpdateOrderHandler $updateOrderHandler,
-        private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler
-    )
-    {
+        private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler,
+    ) {
     }
 
     #[Route('/orders/scheduled/today', name: 'orders_scheduled', methods: ['GET'])]
@@ -73,7 +71,7 @@ class OrderController extends AbstractController
                         $data['PassengersCount'],
                         $data['PaymentMethod'],
                     ))) {
-                        $updatedCount++;
+                        ++$updatedCount;
                     }
                 }
 
@@ -90,7 +88,6 @@ class OrderController extends AbstractController
     {
         $this->deleteAllFinishedOrdersHandler->__invoke(new DeleteAllFinishedOrders\Command());
 
-        return new JsonResponse("Deleted finished orders");
+        return new JsonResponse('Deleted finished orders');
     }
-
 }

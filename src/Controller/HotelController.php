@@ -8,10 +8,10 @@ use App\Hotel\Domain\Hotel;
 use App\Hotel\Repository\HotelRepository;
 use App\LumpSums\Repository\LumpSumsRepository;
 use App\Project\UseCase\AddHotel;
-use App\Project\UseCase\RemoveHotel;
-use App\Project\UseCase\UpdateHotel;
 use App\Project\UseCase\AddHotelHandler;
+use App\Project\UseCase\RemoveHotel;
 use App\Project\UseCase\RemoveHotelHandler;
+use App\Project\UseCase\UpdateHotel;
 use App\Project\UseCase\UpdateHotelHandler;
 use App\Region\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +29,7 @@ class HotelController extends AbstractController
         private readonly LumpSumsRepository $lumpSumsRepository,
         private readonly AddHotelHandler $addHotelHandler,
         private readonly RemoveHotelHandler $removeHotelHandler,
-        private readonly UpdateHOtelHandler $updateHotelHandler,
+        private readonly UpdateHotelHandler $updateHotelHandler,
     ) {
     }
 
@@ -68,7 +68,8 @@ class HotelController extends AbstractController
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return new JsonResponse(['message' => 'Utworzono hotel o ID ' . $hotel->getId()], Response::HTTP_CREATED);
+
+        return new JsonResponse(['message' => 'Utworzono hotel o ID '.$hotel->getId()], Response::HTTP_CREATED);
     }
 
     #[Route('/hotel/{id}/edit', name: 'edit_hotel', methods: ['PUT'])]
@@ -97,6 +98,7 @@ class HotelController extends AbstractController
         if (!$hotel) {
             return new JsonResponse(['error' => 'Hotel nieznaleziony.'], Response::HTTP_NOT_FOUND);
         }
+
         return new JsonResponse($hotel);
     }
 
@@ -108,6 +110,7 @@ class HotelController extends AbstractController
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return $this->json(['message' => 'Hotel o id ' .$id.  'został usunięty.'], Response::HTTP_OK);
+
+        return $this->json(['message' => 'Hotel o id '.$id.'został usunięty.'], Response::HTTP_OK);
     }
 }

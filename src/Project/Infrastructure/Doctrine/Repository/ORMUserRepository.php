@@ -6,5 +6,4 @@ namespace App\Project\Infrastructure\Doctrine\Repository;
 
 class ORMUserRepository
 {
-
 }

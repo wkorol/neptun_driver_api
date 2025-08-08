@@ -11,12 +11,20 @@ use App\Project\UseCase\UpdateLumpSums\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * @phpstan-import-type FixedPriceArray from FixedPrice
+ *
+ * @phpstan-type UpdateLumpSumsDataArray array{
+ *     name: ?string,
+ *     fixedValues: ?FixedPrice[]
+ * }
+ */
 #[AsMessageHandler]
 readonly class UpdateLumpSumsHandler
 {
     public function __construct(
         private LumpSumsRepository $lumpSumsRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -26,6 +34,9 @@ readonly class UpdateLumpSumsHandler
         if (!$existingLumpSums) {
             throw new \PDOException('Nie znaleziono ryczałtów');
         }
+        /**
+         * @var UpdateLumpSumsDataArray $data
+         */
         $data = $command->data;
         if (isset($data['name'])) {
             $existingLumpSums->setName($data['name']);
@@ -33,7 +44,7 @@ readonly class UpdateLumpSumsHandler
 
         if (isset($data['fixedValues'])) {
             $fixedValues = array_map(
-                fn($valueData) => new FixedPrice(
+                fn ($valueData) => new FixedPrice(
                     $valueData['name'],
                     Tariff::fromArray($valueData['tariff1']),
                     Tariff::fromArray($valueData['tariff2'])

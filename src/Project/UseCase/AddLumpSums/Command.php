@@ -9,7 +9,7 @@ use App\LumpSums\Domain\LumpSums;
 readonly class Command
 {
     public function __construct(
-        public LumpSums $lumpSums
+        public LumpSums $lumpSums,
     ) {
     }
 }

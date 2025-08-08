@@ -6,6 +6,14 @@ namespace App\TaxiService\Domain;
 
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-type ServiceArray array{
+ *     id: string,
+ *     name: ?string,
+ *     description: ?string,
+ *     price: ?string
+ * }
+ */
 class Service implements \JsonSerializable
 {
     public function __construct(
@@ -51,10 +59,13 @@ class Service implements \JsonSerializable
         $this->price = $price;
     }
 
+    /**
+     * @return ServiceArray
+     */
     public function jsonSerialize(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->id->toString(),
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price,

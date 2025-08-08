@@ -27,7 +27,7 @@ class UpdateLumpSumsCommand extends Command
         $hotels = $this->hotelRepository->all();
 
         foreach ($hotels as $hotel) {
-            if ($hotel->getLumpSumsExpireDate() !== null && $hotel->getLumpSumsExpireDate() <= new \DateTimeImmutable()) {
+            if (null !== $hotel->getLumpSumsExpireDate() && $hotel->getLumpSumsExpireDate() <= new \DateTimeImmutable()) {
                 $hotel->updateLumpSums($hotel->getNewLumpSums());
                 $hotel->updateNewLumpSums(null);
                 $hotel->updateLumpSumsExpireDate(null);
@@ -37,6 +37,7 @@ class UpdateLumpSumsCommand extends Command
         $this->entityManager->flush();
 
         $output->writeln('LumpSums updated where expiry dates were reached.');
+
         return Command::SUCCESS;
     }
 }

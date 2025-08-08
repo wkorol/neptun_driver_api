@@ -4,10 +4,26 @@ declare(strict_types=1);
 
 namespace App\Hotel\Domain;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\LumpSums\Domain\LumpSums;
 use App\Region\Domain\Region;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-import-type RegionArray from Region
+ * @phpstan-import-type LumpSumsArray from LumpSums
+ *
+ * @phpstan-type HotelArray array{
+ *     id: string,
+ *     name: string,
+ *     region: ?RegionArray,
+ *     lump_sums: ?LumpSumsArray,
+ *     lump_sums_expire_date: ?string,
+ *     new_lump_sums: ?LumpSumsArray,
+ *     update_date: ?string
+ * }
+ */
+#[ApiResource]
 class Hotel implements \JsonSerializable
 {
     public function __construct(
@@ -20,7 +36,6 @@ class Hotel implements \JsonSerializable
         private ?\DateTimeImmutable $updateDate = null,
     ) {
     }
-
 
     public function getId(): Uuid
     {
@@ -67,10 +82,9 @@ class Hotel implements \JsonSerializable
         $this->region = $region;
     }
 
-    public function updateLumpSums(LumpSums $lumpSums,): void
+    public function updateLumpSums(LumpSums $lumpSums): void
     {
         $this->lumpSums = $lumpSums;
-
     }
 
     public function updateLumpSumsExpireDate(?\DateTimeImmutable $expireDate = null): void
@@ -88,17 +102,34 @@ class Hotel implements \JsonSerializable
         $this->updateDate = new \DateTimeImmutable();
     }
 
+    public function setRegion(?Region $region): void
+    {
+        $this->region = $region;
+    }
 
+    public function setLumpSums(?LumpSums $lumpSums): void
+    {
+        $this->lumpSums = $lumpSums;
+    }
+
+    public function setNewLumpSums(?LumpSums $newLumpSums): void
+    {
+        $this->newLumpSums = $newLumpSums;
+    }
+
+    /**
+     * @return HotelArray
+     */
     public function jsonSerialize(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->id->toString(),
             'name' => $this->name,
-            'region' => $this->region,
-            'lump_sums' => $this->lumpSums,
-            'lump_sums_expire_date' => $this->lumpSumsExpireDate,
-            'new_lump_sums' => $this->newLumpSums,
-            'update_date' => $this->updateDate->format('Y-m-d H:i:s'),
+            'region' => $this->region?->jsonSerialize(),
+            'lump_sums' => $this->lumpSums?->jsonSerialize(),
+            'lump_sums_expire_date' => $this->lumpSumsExpireDate?->format('Y-m-d H:i:s'),
+            'new_lump_sums' => $this->newLumpSums?->jsonSerialize(),
+            'update_date' => $this->updateDate?->format('Y-m-d H:i:s'),
         ];
     }
 }

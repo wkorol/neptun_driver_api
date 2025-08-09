@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Entity\Hotel;
 use App\Entity\Region;
-use App\Repository\HotelRepository;
-use App\Repository\RegionRepository;
+use App\Region\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,14 +23,14 @@ class RegionController extends AbstractController
     public function index(): JsonResponse
     {
         return $this->json(
-            $this->regionRepository->findBy([], ['position' => 'ASC'])
+            $this->regionRepository->all()
         );
     }
 
     #[Route('/region/{id}/hotels', name: 'app_region_hotels', methods: ['GET'])]
     public function getHotels(int $id): JsonResponse
     {
-        $region = $this->regionRepository->findOneBy(['id' => $id]);
+        $region = $this->regionRepository->findById($id);
         $hotels = $region->getHotelsSortedByName();
         return $this->json($hotels);
     }

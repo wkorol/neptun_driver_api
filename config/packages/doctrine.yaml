@@ -4,7 +4,8 @@ doctrine:
 
         # IMPORTANT: You MUST configure your server version,
         # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
+        driver: 'pdo_pgsql'
+        server_version: '16'
 
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
@@ -20,14 +21,42 @@ doctrine:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
         mappings:
-            App:
-                type: attribute
+            Hotel:
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
+                type: xml
+                dir: '%kernel.project_dir%/src/Hotel/Infrastructure/Doctrine/mapping'
+                prefix: 'App\Hotel\Domain'
                 alias: App
-        controller_resolver:
-            auto_mapping: false
+            Region:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/Region/Infrastructure/Doctrine/mapping'
+                prefix: 'App\Region\Domain'
+                alias: App
+            LumpSums:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/LumpSums/Infrastructure/Doctrine/mapping'
+                prefix: 'App\LumpSums\Domain'
+                alias: App
+            Service:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/TaxiService/Infrastructure/Doctrine/mapping'
+                prefix: 'App\TaxiService\Domain'
+                alias: App
+            User:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/User/Infrastructure/Doctrine/mapping'
+                prefix: 'App\User\Domain'
+                alias: App
+            Order:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/Order/Infrastructure/Doctrine/mapping'
+                prefix: 'App\Order\Domain'
+                alias: App
 
 when@test:
     doctrine:

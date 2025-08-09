@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\DTO\FixedPrice;
 use App\DTO\Tariff;
-use App\Entity\LumpSums;
-use App\Repository\LumpSumsRepository;
+use App\LumpSums\Domain\LumpSums;
+use App\LumpSums\Repository\LumpSumsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +24,7 @@ class LumpSumsController extends AbstractController
     #[Route('/lump_sums', name: 'lump_sums')]
     public function index(): JsonResponse
     {
-        return $this->json($this->lumpSumsRepository->findAll());
+        return $this->json($this->lumpSumsRepository->all());
     }
 
     #[Route('/lump_sums/add', name: 'add_lump_sums', methods: ['POST'])]
@@ -46,6 +48,7 @@ class LumpSumsController extends AbstractController
         );
 
         $fixedPrice = new LumpSums(
+            Uuid::v4(),
             $data['name'],
             $values
         );

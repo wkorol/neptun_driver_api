@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Controller;
 
 use App\Message\GetDriverStatuses;
@@ -71,15 +70,6 @@ class OrderProxyController extends AbstractController
     public function findDriver(MamTaxiClient $client, string $id): JsonResponse
     {
         return $client->findDriver($id);
-    }
-
-
-
-    #[Route('/import-orders/', name: 'import_orders')]
-    public function importOrders(OrderImporter $importer): JsonResponse
-    {
-        $importer->importFromJsonFiles(__DIR__ . '/../../var/orders');
-        return new JsonResponse('Import zakończony!', 200);
     }
 
     #[Route('/api/proxy/import-orders/{howMany}', name: 'admin_import_orders')]

@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class AddHotelHandler
 {
     public function __construct(
-        private HotelRepository $hotelRepository
+        private HotelRepository $hotelRepository,
     ) {
     }
 

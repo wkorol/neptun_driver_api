@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\User\Domain\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,34 +12,34 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-class RegisterController extends AbstractController
+final class RegisterController extends AbstractController
 {
-    #[Route('/register', name: 'register', methods: ['POST'])]
-    public function register(
+    #[Route('/register', name: 'api_register', methods: ['POST'])]
+    public function __invoke(
         Request $request,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher,
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
+        $payload = json_decode($request->getContent(), true) ?? [];
+        $email = $payload['email'] ?? null;
+        $plain = $payload['password'] ?? null;
 
-        // Basic validation
-        if (empty($data['email']) || empty($data['password'])) {
-            return new JsonResponse(['error' => 'Email i hasło wymagane.'], 400);
+        if (!is_string($email) || !is_string($plain) || strlen($plain) < 8) {
+            return new JsonResponse(['message' => 'Invalid payload'], 400);
         }
 
-        // Create the user with email, password, and default roles
-        $user = new User($data['email'], '', ['ROLE_USER']); // Initialize with an empty password
+        $existing = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+        if ($existing) {
+            return new JsonResponse(['message' => 'User already exists'], 409);
+        }
 
-        // Hash the password and set it on the user
-        $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
-        $user = new User($data['email'], $hashedPassword, $data['roles'] ?? ['ROLE_USER']);
+        $user = new User($email);
+        $hashed = $passwordHasher->hashPassword($user, $plain);
+        $user->setPassword($hashed);
 
-        // Persist the user to the database
-        $entityManager->persist($user);
-        $entityManager->flush();
+        $em->persist($user);
+        $em->flush();
 
-        return new JsonResponse(['message' => 'Użytkownik zarejestrowany poprawnie.'], 201);
+        return new JsonResponse(['message' => 'Registered'], 201);
     }
 }
-

@@ -12,7 +12,10 @@ interface RegionRepository
      * @return Region[]
      */
     public function all(): array;
+
     public function findById(int $id): ?Region;
+
     public function add(Region $region): void;
+
     public function remove(int $id): void;
 }

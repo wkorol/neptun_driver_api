@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Project\UseCase\UpdateOrder;
 
-class Command
+readonly class Command
 {
     public function __construct(
-        public readonly ?int $externalId = null,
-        public readonly ?string $plannedArrivalDate = null,
-        public readonly ?int $status = null,
-        public readonly ?string $notes = null,
-        public readonly ?string $phoneNumber = null,
-        public readonly ?string $companyName = null,
-        public readonly ?float $price = null,
-        public readonly ?int $passengerCount = null,
-        public readonly ?int $paymentMethod = null
-    ) {}
+        public ?int $externalId = null,
+        public ?\DateTimeImmutable $plannedArrivalDate = null,
+        public ?int $status = null,
+        public ?string $notes = null,
+        public ?string $phoneNumber = null,
+        public ?string $companyName = null,
+        public ?float $price = null,
+        public ?int $passengerCount = null,
+        public ?int $paymentMethod = null,
+    ) {
+    }
 }

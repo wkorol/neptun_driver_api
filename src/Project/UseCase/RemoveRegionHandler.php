@@ -14,7 +14,7 @@ class RemoveRegionHandler
 {
     public function __construct(
         private RegionRepository $regionRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 

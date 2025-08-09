@@ -4,22 +4,30 @@ declare(strict_types=1);
 
 namespace App\Region\Domain;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Hotel\Domain\Hotel;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
 
+/**
+ * @phpstan-type RegionArray array{
+ *     id: ?int,
+ *     name: ?string
+ * }
+ */
+#[ApiResource]
 class Region implements \JsonSerializable
 {
-    /**
-     * @param Collection<int, Hotel> $hotels
-     */
+    /** @var Collection<int, Hotel> */
+    private Collection $hotels;
+
     public function __construct(
-        private ?int       $id,
-        private ?string             $name,
-        private ?int                $position = null,
-        private Collection $hotels = new ArrayCollection(),
-    ) {}
+        private ?int $id,
+        private ?string $name,
+        private ?int $position = null,
+    ) {
+        $this->hotels = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -46,9 +54,7 @@ class Region implements \JsonSerializable
         $this->position = $position;
     }
 
-    /**
-     * @return Collection<int, Hotel>
-     */
+    /** @return Collection<int, Hotel> */
     public function getHotels(): Collection
     {
         return $this->hotels;
@@ -58,26 +64,27 @@ class Region implements \JsonSerializable
     {
         if (!$this->hotels->contains($hotel)) {
             $this->hotels->add($hotel);
+            $hotel->setRegion($this);
         }
     }
 
     public function removeHotel(Hotel $hotel): void
     {
-        $this->hotels->removeElement($hotel);
+        if ($this->hotels->removeElement($hotel)) {
+            if ($hotel->getRegion() === $this) {
+                $hotel->setRegion(null);
+            }
+        }
     }
 
-    public function getHotelsSortedByName(): Collection
-    {
-        return $this->hotels->matching(
-            Criteria::create()->orderBy(['name' => 'ASC'])
-        );
-    }
-
+    /**
+     * @return RegionArray
+     */
     public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,
-            'name' => $this->name
+            'name' => $this->name,
         ];
     }
 }

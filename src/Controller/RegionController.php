@@ -39,8 +39,11 @@ class RegionController extends AbstractController
     public function getHotels(int $id): JsonResponse
     {
         $region = $this->regionRepository->findById($id);
-        $hotels = $region->getHotelsSortedByName();
-        return $this->json($hotels);
+        if ($region) {
+            $hotels = $region->getHotels();
+        }
+
+        return $this->json($hotels ?? []);
     }
 
     #[Route('/region/add', name: 'add_region', methods: ['POST'])]
@@ -62,7 +65,7 @@ class RegionController extends AbstractController
             'region' => [
                 'id' => $region->getId(),
                 'name' => $region->getName(),
-            ]
+            ],
         ], Response::HTTP_CREATED);
     }
 
@@ -74,6 +77,7 @@ class RegionController extends AbstractController
             $id,
             $data['name']
         ));
+
         return $this->json(['message' => 'Rejon zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
@@ -81,6 +85,7 @@ class RegionController extends AbstractController
     public function removeRegion(int $id): JsonResponse
     {
         $this->removeRegionHandler->__invoke(new RemoveRegion\Command($id));
-        return $this->json(['message' => 'Rejon o id '. $id . 'został usunięty.'], Response::HTTP_OK);
+
+        return $this->json(['message' => 'Rejon o id '.$id.'został usunięty.'], Response::HTTP_OK);
     }
 }

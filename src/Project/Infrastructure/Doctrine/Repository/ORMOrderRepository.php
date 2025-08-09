@@ -10,12 +10,14 @@ use Doctrine\ORM\EntityManagerInterface;
 
 readonly class ORMOrderRepository implements OrderRepository
 {
-
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
+    /**
+     * @return Order[]|null
+     */
     public function findActualOrders(): ?array
     {
         return $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
@@ -25,6 +27,9 @@ readonly class ORMOrderRepository implements OrderRepository
             ->getResult();
     }
 
+    /**
+     * @return Order[]|null
+     */
     public function findScheduledOrdersForToday(): ?array
     {
         $startOfDay = new \DateTimeImmutable('today 00:00:00');
@@ -46,6 +51,9 @@ readonly class ORMOrderRepository implements OrderRepository
             ->getResult();
     }
 
+    /**
+     * @return Order[]|null
+     */
     public function findScheduledOrdersForNext5Days(): ?array
     {
         $start = new \DateTimeImmutable('tomorrow 00:00:00');

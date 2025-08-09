@@ -31,6 +31,7 @@ class OrderProxyController extends AbstractController
         }
 
         $merged = $client->fetchOrdersWithDetails();
+
         return $this->json($merged);
     }
 
@@ -38,9 +39,9 @@ class OrderProxyController extends AbstractController
     public function dump(MamTaxiClient $client): JsonResponse
     {
         $client->dumpAllOrdersToFiles();
+
         return $this->json(['message' => 'Zrzut zakończony']);
     }
-
 
     #[Route('/api/proxy/debug', name: 'proxy_debug')]
     public function debug(MamTaxiClient $client, SessionInterface $session): JsonResponse
@@ -51,13 +52,13 @@ class OrderProxyController extends AbstractController
         ]);
     }
 
-
     #[Route('/api/session/check', name: 'check_session')]
     public function checkSession(MamTaxiClient $client): JsonResponse
     {
         if ($client->isSessionValid()) {
             return new JsonResponse('Session valid', 200);
         }
+
         return new JsonResponse('Session expired', 401);
     }
 
@@ -77,11 +78,7 @@ class OrderProxyController extends AbstractController
             $client->login();
         }
 
-        $orders = $client->fetchOrdersWithDetails((int)$howMany);
-
-        if (!is_array($orders)) {
-            return new JsonResponse('Invalid response from MamTaxi', 400);
-        }
+        $orders = $client->fetchOrdersWithDetails((int) $howMany);
 
         $importer->importFromArray($orders);
 
@@ -103,10 +100,6 @@ class OrderProxyController extends AbstractController
     {
         $data = $client->driverStatuses();
 
-        if ($data === null) {
-            return $this->json(['message' => 'Brak danych w cache'], 202); // 202: Processing
-        }
-
         return $this->json($data);
     }
 
@@ -114,7 +107,7 @@ class OrderProxyController extends AbstractController
     public function fetchDriverStatuses(MamTaxiClient $client): JsonResponse
     {
         $data = $client->fetchDriverStatuses();
+
         return $this->json($data);
     }
-
 }

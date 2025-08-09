@@ -14,7 +14,7 @@ readonly class RemoveLumpSumsHandler
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private LumpSumsRepository $lumpSumsRepository
+        private LumpSumsRepository $lumpSumsRepository,
     ) {
     }
 

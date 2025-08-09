@@ -13,13 +13,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Uuid $id;
     private string $email;
     private string $password;
+    /**
+     * @var string[]
+     */
     private array $roles;
 
-    public function __construct(string $email, string $password, array $roles = ['ROLE_USER'])
+    /**
+     * @param string[] $roles
+     */
+    public function __construct(string $email, array $roles = ['ROLE_USER'])
     {
         $this->id = Uuid::v4();
         $this->email = $email;
-        $this->password = $password;
         $this->roles = $roles;
     }
 
@@ -38,6 +43,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->roles;
     }
 
+    /**
+     * @param string[] $roles
+     */
     public function setRoles(array $roles): void
     {
         $this->roles = $roles;
@@ -50,7 +58,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-
     }
 
     public function getUserIdentifier(): string
@@ -61,5 +68,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): ?string
     {
         return $this->password;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
     }
 }

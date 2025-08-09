@@ -9,7 +9,7 @@ use App\Order\Domain\Order;
 class Command
 {
     public function __construct(
-        public readonly Order $order
+        public readonly Order $order,
     ) {
     }
 }

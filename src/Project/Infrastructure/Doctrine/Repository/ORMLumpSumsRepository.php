@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Doctrine\Repository;
 
-use App\DTO\FixedPrice;
-use App\DTO\Tariff;
 use App\LumpSums\Domain\LumpSums;
 use App\LumpSums\Repository\LumpSumsRepository;
 use Doctrine\ORM\EntityManagerInterface;

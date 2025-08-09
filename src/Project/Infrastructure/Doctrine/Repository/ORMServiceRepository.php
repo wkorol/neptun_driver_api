@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class ORMServiceRepository implements ServiceRepository
 {
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 

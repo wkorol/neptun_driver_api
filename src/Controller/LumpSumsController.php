@@ -9,10 +9,10 @@ use App\DTO\Tariff;
 use App\LumpSums\Domain\LumpSums;
 use App\LumpSums\Repository\LumpSumsRepository;
 use App\Project\UseCase\AddLumpSums;
-use App\Project\UseCase\RemoveLumpSums;
-use App\Project\UseCase\UpdateLumpSums;
 use App\Project\UseCase\AddLumpSumsHandler;
+use App\Project\UseCase\RemoveLumpSums;
 use App\Project\UseCase\RemoveLumpSumsHandler;
+use App\Project\UseCase\UpdateLumpSums;
 use App\Project\UseCase\UpdateLumpSumsHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,7 +27,7 @@ class LumpSumsController extends AbstractController
         private readonly LumpSumsRepository $lumpSumsRepository,
         private readonly AddLumpSumsHandler $addLumpSumsHandler,
         private readonly RemoveLumpSumsHandler $removeLumpSumsHandler,
-        private readonly UpdateLumpSumsHandler $updateLumpSumsHandler
+        private readonly UpdateLumpSumsHandler $updateLumpSumsHandler,
     ) {
     }
 
@@ -44,12 +44,12 @@ class LumpSumsController extends AbstractController
 
         if (!$data || !isset($data['name'], $data['fixedValues'])) {
             return $this->json([
-                'message' => 'Invalid JSON data or missing fields'
+                'message' => 'Invalid JSON data or missing fields',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $values = array_map(
-            fn($data) => new FixedPrice(
+            fn ($data) => new FixedPrice(
                 $data['name'],
                 Tariff::fromArray($data['tariff1']),
                 Tariff::fromArray($data['tariff2']),
@@ -67,7 +67,7 @@ class LumpSumsController extends AbstractController
 
         return $this->json([
             'id' => $lumpSums->getId(),
-            'message' => 'Utworzono nowy zestaw ryczałtów.'
+            'message' => 'Utworzono nowy zestaw ryczałtów.',
         ]);
     }
 
@@ -75,7 +75,8 @@ class LumpSumsController extends AbstractController
     public function removeLumpSums(Uuid $id): JsonResponse
     {
         $this->removeLumpSumsHandler->__invoke(new RemoveLumpSums\Command($id));
-        return $this->json(['message' => 'Ryczałty o ID '. $id . ' zostały usunięte.'], Response::HTTP_OK);
+
+        return $this->json(['message' => 'Ryczałty o ID '.$id.' zostały usunięte.'], Response::HTTP_OK);
     }
 
     #[Route('/lump_sums/{id}/edit', name: 'edit_lump_sums', methods: ['PUT'])]
@@ -85,19 +86,18 @@ class LumpSumsController extends AbstractController
 
         if (!$data || !isset($data['name'], $data['fixedValues'])) {
             return $this->json([
-                'message' => 'Invalid JSON data or missing fields'
+                'message' => 'Invalid JSON data or missing fields',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         try {
             $this->updateLumpSumsHandler->__invoke(new UpdateLumpSums\Command($id, $data));
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Błąd w aktualizacji ryczałtów: ' . $e->getMessage()], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Błąd w aktualizacji ryczałtów: '.$e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->json([
             'message' => 'Lump Sums updated successfully',
         ], Response::HTTP_OK);
     }
-
 }

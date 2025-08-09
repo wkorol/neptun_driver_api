@@ -22,14 +22,14 @@ readonly class AddRegionHandler
             $command->id,
             $command->name,
             $command->position,
-            $command->hotels
         );
 
-        if ($this->regionRepository->findById($region->getId()) !== null) {
+        if (null !== $this->regionRepository->findById($region->getId())) {
             throw new \PDOException('Rejon o podanym ID już istnieje.');
         }
 
-       $this->regionRepository->add($region);
+        $this->regionRepository->add($region);
+
         return $region;
     }
 }

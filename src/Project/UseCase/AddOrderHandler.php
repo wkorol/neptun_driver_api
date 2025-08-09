@@ -13,7 +13,7 @@ readonly class AddOrderHandler
 {
     public function __construct(
         private OrderRepository $orderRepository,
-        private UpdateOrderHandler $updateOrderHandler
+        private UpdateOrderHandler $updateOrderHandler,
     ) {
     }
 
@@ -31,6 +31,7 @@ readonly class AddOrderHandler
                 $command->order->getPassengerCount(),
                 $command->order->getPaymentMethod()
             ));
+
             return;
         }
 

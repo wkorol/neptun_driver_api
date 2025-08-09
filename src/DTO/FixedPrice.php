@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-class FixedPrice implements \JsonSerializable
+/**
+ * @phpstan-import-type TariffArray from Tariff
+ *
+ * @phpstan-type FixedPriceArray array{
+ *     name: string,
+ *     tariff1: TariffArray,
+ *     tariff2: TariffArray
+ * }
+ */
+readonly class FixedPrice implements \JsonSerializable
 {
     public function __construct(
-        private readonly string $name,
-        private readonly Tariff $tariff1,
-        private readonly Tariff $tariff2,
-    )
-    {
+        private string $name,
+        private Tariff $tariff1,
+        private Tariff $tariff2,
+    ) {
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
@@ -32,12 +37,15 @@ class FixedPrice implements \JsonSerializable
         return $this->tariff2;
     }
 
+    /**
+     * @return FixedPriceArray
+     */
     public function jsonSerialize(): array
     {
         return [
             'name' => $this->name,
-            'tariff1' => $this->getTariff1()->jsonSerialize(),
-            'tariff2' => $this->getTariff2()->jsonSerialize()
+            'tariff1' => $this->tariff1->jsonSerialize(),
+            'tariff2' => $this->tariff2->jsonSerialize(),
         ];
     }
 }

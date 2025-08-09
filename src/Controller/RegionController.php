@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Entity\Hotel;
-use App\Entity\Region;
-use App\Repository\HotelRepository;
-use App\Repository\RegionRepository;
+use App\Project\UseCase\AddRegion;
+use App\Project\UseCase\AddRegionHandler;
+use App\Project\UseCase\EditRegion;
+use App\Project\UseCase\EditRegionHandler;
+use App\Project\UseCase\RemoveRegion;
+use App\Project\UseCase\RemoveRegionHandler;
+use App\Region\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +21,9 @@ class RegionController extends AbstractController
 {
     public function __construct(
         private readonly RegionRepository $regionRepository,
+        private readonly AddRegionHandler $addRegionHandler,
+        private readonly EditRegionHandler $editRegionHandler,
+        private readonly RemoveRegionHandler $removeRegionHandler,
     ) {
     }
 
@@ -23,16 +31,19 @@ class RegionController extends AbstractController
     public function index(): JsonResponse
     {
         return $this->json(
-            $this->regionRepository->findBy([], ['position' => 'ASC'])
+            $this->regionRepository->all()
         );
     }
 
     #[Route('/region/{id}/hotels', name: 'app_region_hotels', methods: ['GET'])]
     public function getHotels(int $id): JsonResponse
     {
-        $region = $this->regionRepository->findOneBy(['id' => $id]);
-        $hotels = $region->getHotelsSortedByName();
-        return $this->json($hotels);
+        $region = $this->regionRepository->findById($id);
+        if ($region) {
+            $hotels = $region->getHotels();
+        }
+
+        return $this->json($hotels ?? []);
     }
 
     #[Route('/region/add', name: 'add_region', methods: ['POST'])]
@@ -40,13 +51,11 @@ class RegionController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $region = new Region(
-            $data['id'],
-            $data['name']
-        );
-
         try {
-            $this->regionRepository->addRegion($region);
+            $region = $this->addRegionHandler->__invoke(new AddRegion\Command(
+                (int) $data['id'],
+                $data['name'],
+            ));
         } catch (\PDOException $exception) {
             return $this->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
@@ -56,7 +65,7 @@ class RegionController extends AbstractController
             'region' => [
                 'id' => $region->getId(),
                 'name' => $region->getName(),
-            ]
+            ],
         ], Response::HTTP_CREATED);
     }
 
@@ -64,14 +73,19 @@ class RegionController extends AbstractController
     public function editRegion(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $this->regionRepository->editRegion($id, $data);
+        $this->editRegionHandler->__invoke(new EditRegion\Command(
+            $id,
+            $data['name']
+        ));
+
         return $this->json(['message' => 'Rejon zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
     #[Route('/region/{id}/delete', name: 'remove_region', methods: ['DELETE'])]
     public function removeRegion(int $id): JsonResponse
     {
-        $this->regionRepository->removeRegion($id);
-        return $this->json(['message' => 'Rejon o id '. $id . 'został usunięty.'], Response::HTTP_OK);
+        $this->removeRegionHandler->__invoke(new RemoveRegion\Command($id));
+
+        return $this->json(['message' => 'Rejon o id '.$id.'został usunięty.'], Response::HTTP_OK);
     }
 }

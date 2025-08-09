@@ -1,0 +1,12 @@
+api_platform:
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Hotel/Domain'
+            - '%kernel.project_dir%/src/LumpSums/Domain'
+            - '%kernel.project_dir%/src/Region/Domain'

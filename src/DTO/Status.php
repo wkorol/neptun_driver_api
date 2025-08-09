@@ -25,7 +25,7 @@ enum Status: int
             self::NoPassenger => 'Kierowca stwierdził brak pasażera',
             self::CancelledByUser => 'Kurs anulowany przez klienta',
             self::InProgress => 'Kierowca jest w trakcie kursu z klientem',
-            self::Finished => 'Kurs zakończony'
+            self::Finished => 'Kurs zakończony',
         };
     }
 }

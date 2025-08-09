@@ -9,16 +9,14 @@ use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\CookieJarInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
+use GuzzleHttp\Promise;
 use GuzzleHttp\Psr7\Request;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
-use GuzzleHttp\Promise;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-
 
 class MamTaxiClient
 {
@@ -26,10 +24,8 @@ class MamTaxiClient
     private readonly CookieJarInterface $cookieJar;
     private ?SessionInterface $session = null;
     private string $baseUrl = 'https://mamtaxi.pl/';
-    private string $cookieFile = __DIR__ . '/../../var/mam_taxi_cookie_jar.ser';
+    private string $cookieFile = __DIR__.'/../../var/mam_taxi_cookie_jar.ser';
     private bool $cliContext = false;
-
-
 
     public function __construct(
         private RequestStack $requestStack,
@@ -37,7 +33,7 @@ class MamTaxiClient
     ) {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request !== null) {
+        if (null !== $request) {
             try {
                 if ($request->hasSession()) {
                     $this->session = $request->getSession();
@@ -68,7 +64,6 @@ class MamTaxiClient
         ]);
     }
 
-
     public function login(): bool
     {
         $response = $this->httpClient->get('/Account/Login');
@@ -82,19 +77,19 @@ class MamTaxiClient
 
         $response = $this->httpClient->post('/Account/Login', [
             'form_params' => [
-                'Login' => "wiktorkorol@gmail.com",
-                'Password' => "760661",
+                'Login' => 'wiktorkorol@gmail.com',
+                'Password' => '760661',
                 'RememberMe' => 'true',
                 '__RequestVerificationToken' => $token,
             ],
             'headers' => [
-                'Referer' => $this->baseUrl . '/Account/Login',
+                'Referer' => $this->baseUrl.'/Account/Login',
                 'Origin' => $this->baseUrl,
             ],
         ]);
 
         foreach ($this->cookieJar->toArray() as $cookie) {
-            if ($cookie['Name'] === '.AspNet.ApplicationCookie') {
+            if ('.AspNet.ApplicationCookie' === $cookie['Name']) {
                 if ($this->session && $this->session->isStarted()) {
                     $this->session->set('mam_taxi_cookie_jar', serialize($this->cookieJar));
                     $this->session->save();
@@ -122,22 +117,23 @@ class MamTaxiClient
             $response = $this->httpClient->get('/api/5550618/Corporation/124/Orders?draw=1&columns[0][data]=Id&columns[0][name]=StartDate&columns[0][searchable]=true&columns[0][search][value]=&columns[0][search][regex]=false&columns[1][data]=CreationDate&columns[1][name]=CreationDate&columns[1][searchable]=true&columns[1][orderable]=false&columns[1][search][value]=&columns[1][search][regex]=false&columns[2][data]=ExternalOrderId&columns[2][name]=ExternalOrderId&columns[2][searchable]=true&columns[2][orderable]=false&columns[2][search][value]=&columns[2][search][regex]=false&columns[3][data]=From&columns[3][name]=From&columns[3][searchable]=true&columns[3][orderable]=false&columns[3][search][value]=&columns[3][search][regex]=false&columns[4][data]=Destination&columns[4][name]=Destination&columns[4][searchable]=true&columns[4][orderable]=false&columns[4][search][value]=&columns[4][search][regex]=false&columns[5][data]=TaxiNumber&columns[5][name]=TaxiNumber&columns[5][searchable]=true&columns[5][orderable]=false&columns[5][search][value]=&columns[5][search][regex]=false&columns[6][data]=Price&columns[6][name]=Price&columns[6][searchable]=true&columns[6][orderable]=false&columns[6][search][value]=&columns[6][search][regex]=false&columns[7][data]=StatusCode&columns[7][name]=StatusCode&columns[7][searchable]=true&columns[7][orderable]=false&columns[7][search][value]=&columns[7][search][regex]=false&columns[8][data]=PaymentMethodCode&columns[8][name]=Payments&columns[8][searchable]=true&columns[8][orderable]=false&columns[8][search][value]=&columns[8][search][regex]=false&columns[9][data]=SecondPaymentMethodCode&columns[9][name]=CashlessPayments&columns[9][searchable]=true&columns[9][orderable]=false&columns[9][search][value]=&columns[9][search][regex]=false&columns[10][data]=Id&columns[10][name]=Id&columns[10][searchable]=true&columns[10][orderable]=false&columns[10][search][value]=&columns[10][search][regex]=false&columns[11][data]=PlannedArrivalDate&columns[11][name]=PlannedArrivalDate&columns[11][searchable]=true&columns[11][orderable]=false&columns[11][search][value]=&columns[11][search][regex]=false&order[0][column]=1&order[0][dir]=desc&start=0&length=1&search[value]=&search[regex]=false&columns[0][orderable]=false&contextTypeId=6', [
                 'headers' => [
                     'X-Requested-With' => 'XMLHttpRequest',
-                    'Referer' => $this->baseUrl . '/',
+                    'Referer' => $this->baseUrl.'/',
                 ],
             ]);
 
-            return $response->getStatusCode() === 200;
+            return 200 === $response->getStatusCode();
         } catch (\Throwable) {
             if ($this->cliContext) {
                 return $this->login();
             }
+
             return false;
         }
     }
 
     public function getDebugCookies(): array
     {
-        return array_map(fn($cookie) => [
+        return array_map(fn ($cookie) => [
             'name' => $cookie['Name'],
             'value' => $cookie['Value'],
             'domain' => $cookie['Domain'],
@@ -146,11 +142,11 @@ class MamTaxiClient
     }
 
     public function dumpAllOrdersToFiles(
-        string $outputDir = __DIR__ . '/../../var/orders',
-        string $statePath = __DIR__ . '/../../var/dump_state.json',
+        string $outputDir = __DIR__.'/../../var/orders',
+        string $statePath = __DIR__.'/../../var/dump_state.json',
         int $max = 10000,
         int $chunk = 10000,
-        int $batchSize = 100 // ilość zamówień na jedno zapytanie HTTP
+        int $batchSize = 100, // ilość zamówień na jedno zapytanie HTTP
     ): void {
         // Upewnij się, że folder istnieje
         if (!is_dir($outputDir)) {
@@ -185,14 +181,14 @@ class MamTaxiClient
                 $response = $this->httpClient->get($url, [
                     'headers' => [
                         'X-Requested-With' => 'XMLHttpRequest',
-                        'Referer' => $this->baseUrl . '/',
-                    ]
+                        'Referer' => $this->baseUrl.'/',
+                    ],
                 ]);
 
                 $data = json_decode($response->getBody()->getContents(), true);
                 $orders = $data['data'] ?? [];
 
-                if (count($orders) === 0) {
+                if (0 === count($orders)) {
                     break 2; // brak więcej danych
                 }
 
@@ -200,7 +196,8 @@ class MamTaxiClient
                     $details = [];
                     try {
                         $details = $this->fetchOrderDetails($order['Id']);
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                    }
 
                     $merged = array_merge($order, $details);
                     if (!$first) {
@@ -210,9 +207,9 @@ class MamTaxiClient
                     }
 
                     fwrite($file, json_encode($merged, JSON_UNESCAPED_UNICODE));
-                    $fetched++;
-                    $fileFetched++;
-                    $start++;
+                    ++$fetched;
+                    ++$fileFetched;
+                    ++$start;
 
                     if ($fetched >= $max || $fileFetched >= $chunk) {
                         break;
@@ -231,13 +228,12 @@ class MamTaxiClient
 
             // Zapisz stan
             file_put_contents($statePath, json_encode(['start' => $start]));
-            $fileIndex++;
+            ++$fileIndex;
         }
     }
 
     public function fetchOrdersWithDetails(?int $howMany = 200): array
     {
-
         $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&columns[0][data]=Id&columns[0][name]=StartDate&columns[0][searchable]=true&columns[0][search][value]=&columns[0][search][regex]=false&columns[1][data]=CreationDate&columns[1][name]=CreationDate&columns[1][searchable]=true&columns[1][orderable]=false&columns[1][search][value]=&columns[1][search][regex]=false&columns[2][data]=ExternalOrderId&columns[2][name]=ExternalOrderId&columns[2][searchable]=true&columns[2][orderable]=false&columns[2][search][value]=&columns[2][search][regex]=false&columns[3][data]=From&columns[3][name]=From&columns[3][searchable]=true&columns[3][orderable]=false&columns[3][search][value]=&columns[3][search][regex]=false&columns[4][data]=Destination&columns[4][name]=Destination&columns[4][searchable]=true&columns[4][orderable]=false&columns[4][search][value]=&columns[4][search][regex]=false&columns[5][data]=TaxiNumber&columns[5][name]=TaxiNumber&columns[5][searchable]=true&columns[5][orderable]=false&columns[5][search][value]=&columns[5][search][regex]=false&columns[6][data]=Price&columns[6][name]=Price&columns[6][searchable]=true&columns[6][orderable]=false&columns[6][search][value]=&columns[6][search][regex]=false&columns[7][data]=StatusCode&columns[7][name]=StatusCode&columns[7][searchable]=true&columns[7][orderable]=false&columns[7][search][value]=&columns[7][search][regex]=false&columns[8][data]=PaymentMethodCode&columns[8][name]=Payments&columns[8][searchable]=true&columns[8][orderable]=false&columns[8][search][value]=&columns[8][search][regex]=false&columns[9][data]=SecondPaymentMethodCode&columns[9][name]=CashlessPayments&columns[9][searchable]=true&columns[9][orderable]=false&columns[9][search][value]=&columns[9][search][regex]=false&columns[10][data]=Id&columns[10][name]=Id&columns[10][searchable]=true&columns[10][orderable]=false&columns[10][search][value]=&columns[10][search][regex]=false&columns[11][data]=PlannedArrivalDate&columns[11][name]=PlannedArrivalDate&columns[11][searchable]=true&columns[11][orderable]=false&columns[11][search][value]=&columns[11][search][regex]=false&order[0][column]=1&order[0][dir]=desc&start=0&length=$howMany&search[value]=&search[regex]=false&columns[0][orderable]=false&contextTypeId=6");
 
         $json = json_decode($response->getBody()->getContents(), true);
@@ -250,13 +246,12 @@ class MamTaxiClient
             $promises[$orderId] = $this->httpClient->getAsync("/api/5550618/Corporation/124/Orders/{$orderId}", [
                 'headers' => [
                     'X-Requested-With' => 'XMLHttpRequest',
-                    'Referer' => $this->baseUrl . '/',
+                    'Referer' => $this->baseUrl.'/',
                 ],
             ]);
         }
 
         $results = Promise\Utils::settle($promises)->wait();
-
 
         $merged = [];
         foreach ($orders as $order) {
@@ -282,7 +277,7 @@ class MamTaxiClient
         $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
             'headers' => [
                 'X-Requested-With' => 'XMLHttpRequest',
-                'Referer' => $this->baseUrl . '/',
+                'Referer' => $this->baseUrl.'/',
             ],
         ]);
 
@@ -297,12 +292,12 @@ class MamTaxiClient
                 throw new \Exception('Failed');
             }
         }
-        for ($i = 4000; $i < 35000; $i++) {
+        for ($i = 4000; $i < 35000; ++$i) {
             try {
                 $response = $this->httpClient->get("/api/5550618/Driver/0/Drivers/{$i}/Status", [
                     'headers' => [
                         'X-Requested-With' => 'XMLHttpRequest',
-                        'Referer' => $this->baseUrl . '/',
+                        'Referer' => $this->baseUrl.'/',
                     ],
                 ]);
             } catch (\Exception $e) {
@@ -310,11 +305,12 @@ class MamTaxiClient
             }
             $data = json_decode($response->getBody()->getContents(), true);
             if (isset($data['TaxiNo'])) {
-                if (in_array($data['TaxiNo'],  [])) {
+                if (in_array($data['TaxiNo'], [])) {
                     $driverIds[] = [$data['TaxiNo'] => $i];
                 }
             }
         }
+
         return new JsonResponse($driverIds);
     }
 
@@ -322,7 +318,8 @@ class MamTaxiClient
     {
         return $this->cache->get('mam_taxi_driver_statuses', function (ItemInterface $item) {
             $item->expiresAfter(60);
-            return []; // fallback
+
+            return [];
         });
     }
 
@@ -655,7 +652,7 @@ class MamTaxiClient
 
         $pool = new Pool($this->httpClient, $requests($driverUrls), [
             'concurrency' => 20,
-            'fulfilled' => function ($response, $index) use (&$driversStatus, $driverUrls) {
+            'fulfilled' => function ($response, $index) use (&$driversStatus) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 $driversStatus[] = [
                     'TaxiNo' => $data['TaxiNo'] ?? null,
@@ -664,7 +661,7 @@ class MamTaxiClient
                     'Status' => $data['Status'] ?? null,
                 ];
             },
-            'rejected' => function (RequestException $reason, $index) use (&$driversStatus, $driverUrls) {
+            'rejected' => function (RequestException $reason, $index) use (&$driversStatus) {
                 $driversStatus[] = [
                     'TaxiNo' => null,
                     'Latitude' => null,

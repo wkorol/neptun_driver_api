@@ -2,27 +2,25 @@
 
 declare(strict_types=1);
 
-
 namespace App\Service;
 
-use App\DTO\Status;
-use App\Entity\Order;
-use App\Repository\OrderRepository;
+use App\Order\Domain\Order;
+use App\Project\UseCase\AddOrder\Command;
+use App\Project\UseCase\AddOrderHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
-
 class OrderImporter
 {
-    public function __construct(private EntityManagerInterface $em, private OrderRepository $orderRepository) {
-
+    public function __construct(private EntityManagerInterface $entityManager, private AddOrderHandler $addOrderHandler)
+    {
     }
 
     public function importFromArray(array $orders): void
     {
         foreach ($orders as $data) {
             $externalId = $data['Id'] ?? null;
-            if ($externalId === null) {
+            if (null === $externalId) {
                 continue;
             }
 
@@ -41,7 +39,6 @@ class OrderImporter
                 continue;
             }
 
-            // Add 1 hour
             $createdAtPlusTwoHour = $createdAt?->modify('+2 hour');
             $plannedArrivalDatePlusTwoHour = $plannedArrivalDate?->modify('+2 hour');
             $companyName = $data['CompanyName'] ?? null;
@@ -51,6 +48,7 @@ class OrderImporter
 
             try {
                 $order = new Order(
+                    id: Uuid::v4(),
                     externalId: $externalId,
                     createdAt: $createdAtPlusTwoHour,
                     plannedArrivalDate: $plannedArrivalDatePlusTwoHour,
@@ -69,95 +67,19 @@ class OrderImporter
                     paymentMethod: $paymentMethod
                 );
             } catch (\Exception $e) {
-                dd($e->getMessage() . 'External id: ' . $externalId . 'Status: '. $status);
+                dd($e->getMessage().'External id: '.$externalId.'Status: '.$status);
             }
 
-
             try {
-                $this->orderRepository->addOrder($order);
+                $this->addOrderHandler->__invoke(new Command(
+                    $order
+                ));
             } catch (\PDOException $exception) {
                 continue;
             }
         }
 
-        $this->em->flush();
-        $this->em->clear();
-    }
-
-    public function importFromJsonFiles(string $dir): void
-    {
-        $files = glob($dir . '/orders_*.json');
-        usort($files, function ($a, $b) {
-            preg_match('/orders_(\d+)\.json$/', $a, $matchA);
-            preg_match('/orders_(\d+)\.json$/', $b, $matchB);
-            return ((int) $matchA[1]) <=> ((int) $matchB[1]);
-        });
-
-        foreach ($files as $filePath) {
-            $json = file_get_contents($filePath);
-            $orders = json_decode($json, true);
-
-            if (!is_array($orders)) {
-                continue;
-            }
-
-            foreach ($orders as $data) {
-                $externalId = $data['Id'];
-                $createdAt = new \DateTimeImmutable($data['CreationDate']);
-                $status = $data['Status'];
-                $city = $data['City'];
-                $street = $data['Street'] ?? null;
-                $house = $data['House'] ?? null;
-                $from = $data['From'] ?? null;
-                $taxiNumber = $data['TaxiNumber'] ?? null;
-                $destination = $data['Destination'] ?? null;
-                $notes = $data['Notes'] ?? null;
-                $phoneNumber = $data['PhoneNumber'] ?? null;
-                $plannedArrivalDate = $data['PlannedArrivalDate'] ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null;
-
-                // Add 1 hour
-                $createdAtPlusOneHour = $createdAt?->modify('+2 hour');
-                $plannedArrivalDatePlusOneHour = $plannedArrivalDate?->modify('+2 hour');
-                $companyName = $data['CompanyName'] ?? null;
-                $price = $data['Price'] ?? null;
-                $passengerCount = $data['PassengerCount'] ?? null;
-
-                if ($externalId === null) {
-                    continue;
-                }
-
-                $order = new Order(
-                    externalId: $externalId,
-                    createdAt: $createdAtPlusOneHour,
-                    plannedArrivalDate: $plannedArrivalDatePlusOneHour,
-                    status: $status,
-                    city: $city,
-                    street: $street,
-                    house: $house,
-                    from: $from,
-                    taxiNumber: $taxiNumber,
-                    destination: $destination,
-                    notes: $notes,
-                    phoneNumber: $phoneNumber,
-                    companyName: $companyName,
-                    price: $price,
-                    passengerCount: $passengerCount
-                );
-
-                if ($order->getStatus() !== Status::Registered) {
-                    continue;
-                }
-
-                try {
-                    $this->orderRepository->addOrder($order);
-                } catch (\PDOException $exception) {
-                    continue;
-                }
-
-            }
-
-            $this->em->flush();
-            $this->em->clear();
-        }
+        $this->entityManager->flush();
+        $this->entityManager->clear();
     }
 }

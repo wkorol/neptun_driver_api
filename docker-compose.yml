@@ -1,24 +1,33 @@
-version: '3.8'
-
 services:
-  php:
-    depends_on:
-      - db
+  base:
+    image: neptun-base:latest
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: neptun_api
+      context: ./
+      dockerfile: ./docker/base/Dockerfile
+  application:
+    depends_on:
+      - base
+    build:
+      context: ./
+      dockerfile: ./docker/dev/Dockerfile
+    image: neptun-backend:latest
     volumes:
-      - ./:/var/www/html
+      - ./docker/dev/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
+      - .:/home/www
+    networks:
+      - default
     ports:
       - "8000:80"
-  db:
-    image: mysql:8.0
-    container_name: neptun_db_local
+  database:
+    image: postgres:16
     environment:
-      MYSQL_DATABASE: neptun_local
-      MYSQL_ROOT_PASSWORD: rootpassword  # Set root password only
+      POSTGRES_PASSWORD: main
+      POSTGRES_USER: main
+      POSTGRES_DB: main
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - /var/lib/mysql  # Use an anonymous volume for MySQL data
+      - neptun-postgresql:/var/lib/postgresql/data
+volumes:
+  neptun-postgresql:
+    external: true

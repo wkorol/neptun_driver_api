@@ -1,11 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Entity\Hotel;
-use App\Repository\HotelRepository;
-use App\Repository\LumpSumsRepository;
-use App\Repository\RegionRepository;
+use App\Hotel\Domain\Hotel;
+use App\Hotel\Repository\HotelRepository;
+use App\LumpSums\Repository\LumpSumsRepository;
+use App\Project\UseCase\AddHotel;
+use App\Project\UseCase\AddHotelHandler;
+use App\Project\UseCase\RemoveHotel;
+use App\Project\UseCase\RemoveHotelHandler;
+use App\Project\UseCase\UpdateHotel;
+use App\Project\UseCase\UpdateHotelHandler;
+use App\Region\Repository\RegionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,14 +23,20 @@ use Symfony\Component\Uid\Uuid;
 
 class HotelController extends AbstractController
 {
-    public function __construct(private HotelRepository $hotelRepository, private RegionRepository $regionRepository, private LumpSumsRepository $lumpSumsRepository)
-    {
+    public function __construct(
+        private readonly HotelRepository $hotelRepository,
+        private readonly RegionRepository $regionRepository,
+        private readonly LumpSumsRepository $lumpSumsRepository,
+        private readonly AddHotelHandler $addHotelHandler,
+        private readonly RemoveHotelHandler $removeHotelHandler,
+        private readonly UpdateHotelHandler $updateHotelHandler,
+    ) {
     }
 
     #[Route('/hotel', name: 'app_hotel')]
     public function index(): JsonResponse
     {
-        return new JsonResponse($this->hotelRepository->findBy([], ['name' => 'ASC']));
+        return new JsonResponse($this->hotelRepository->all());
     }
 
     #[Route('/hotel/add', name: 'add_hotel')]
@@ -30,7 +44,7 @@ class HotelController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $region = $this->regionRepository->find($data['regionId']);
+        $region = $this->regionRepository->findById($data['regionId']);
         $lumpSums = $this->lumpSumsRepository->find($data['lumpSumsId']);
         $newLumpSums = isset($data['newLumpSumsId'])
             ? $this->lumpSumsRepository->find($data['newLumpSumsId'])
@@ -41,6 +55,7 @@ class HotelController extends AbstractController
         }
 
         $hotel = new Hotel(
+            Uuid::v4(),
             $data['name'],
             $region,
             $lumpSums,
@@ -49,43 +64,41 @@ class HotelController extends AbstractController
         );
 
         try {
-            $this->hotelRepository->addHotel($hotel);
+            $this->addHotelHandler->__invoke(new AddHotel\Command($hotel));
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return new JsonResponse(['message' => 'Utworzono hotel o ID ' . $hotel->getId()], Response::HTTP_CREATED);
+
+        return new JsonResponse(['message' => 'Utworzono hotel o ID '.$hotel->getId()], Response::HTTP_CREATED);
     }
 
     #[Route('/hotel/{id}/edit', name: 'edit_hotel', methods: ['PUT'])]
-    public function editHotel(string $id, Request $request): JsonResponse
+    public function editHotel(Uuid $id, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        // Find the existing hotel
-        $existingHotel = $this->hotelRepository->find($id);
-        if (!$existingHotel) {
-            return new JsonResponse(['error' => 'Hotel nieznaleziony.'], Response::HTTP_NOT_FOUND);
-        }
         try {
-            $this->hotelRepository->updateHotel(
-                $existingHotel,
-                $data
+            $this->updateHotelHandler->__invoke(
+                new UpdateHotel\Command(
+                    $id,
+                    $data,
+                )
             );
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
-
         return new JsonResponse(['message' => 'Hotel zaktualizowany poprawnie.'], Response::HTTP_OK);
     }
 
     #[Route('/hotel/{id}', name: 'get_hotel', methods: ['GET'])]
-    public function hotelInfo(string $id): JsonResponse
+    public function hotelInfo(Uuid $id): JsonResponse
     {
-        $hotel = $this->hotelRepository->find($id);
+        $hotel = $this->hotelRepository->findById($id);
         if (!$hotel) {
             return new JsonResponse(['error' => 'Hotel nieznaleziony.'], Response::HTTP_NOT_FOUND);
         }
+
         return new JsonResponse($hotel);
     }
 
@@ -93,12 +106,11 @@ class HotelController extends AbstractController
     public function removeHotel(Uuid $id): JsonResponse
     {
         try {
-            $this->hotelRepository->removeHotel($id);
+            $this->removeHotelHandler->__invoke(new RemoveHotel\Command($id));
         } catch (\PDOException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-        return $this->json(['message' => 'Hotel o id ' .$id.  'został usunięty.'], Response::HTTP_OK);
+
+        return $this->json(['message' => 'Hotel o id '.$id.'został usunięty.'], Response::HTTP_OK);
     }
-
-
 }

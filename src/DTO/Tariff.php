@@ -4,17 +4,32 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-class Tariff implements \JsonSerializable
+/**
+ * @phpstan-type TariffArray array{
+ *     tariffType: TariffType,
+ *     carValue: int,
+ *     bus5_6Value: int,
+ *     bus7_8Value: ?int
+ * }
+ */
+readonly class Tariff implements \JsonSerializable
 {
     public function __construct(
-        private readonly TariffType $tariffType,
-        private readonly int        $carValue,
-        private readonly int $bus5_6Value,
-        private readonly ?int $bus7_8Value,
-    )
-    {
+        private TariffType $tariffType,
+        private int $carValue,
+        private int $bus5_6Value,
+        private ?int $bus7_8Value,
+    ) {
     }
 
+    /**
+     * @param array{
+     *     tariffType: int,
+     *     carValue: int,
+     *     bus5_6Value: int,
+     *     bus7_8Value: ?int
+     * } $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -25,6 +40,9 @@ class Tariff implements \JsonSerializable
         );
     }
 
+    /**
+     * @return TariffArray
+     */
     public function jsonSerialize(): array
     {
         return [

@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Repository\HotelRepository;
+use App\Hotel\Repository\HotelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -24,10 +24,10 @@ class UpdateLumpSumsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $hotels = $this->hotelRepository->findAll();
+        $hotels = $this->hotelRepository->all();
 
         foreach ($hotels as $hotel) {
-            if ($hotel->getLumpSumsExpireDate() !== null && $hotel->getLumpSumsExpireDate() <= new \DateTimeImmutable()) {
+            if (null !== $hotel->getLumpSumsExpireDate() && $hotel->getLumpSumsExpireDate() <= new \DateTimeImmutable()) {
                 $hotel->updateLumpSums($hotel->getNewLumpSums());
                 $hotel->updateNewLumpSums(null);
                 $hotel->updateLumpSumsExpireDate(null);
@@ -37,6 +37,7 @@ class UpdateLumpSumsCommand extends Command
         $this->entityManager->flush();
 
         $output->writeln('LumpSums updated where expiry dates were reached.');
+
         return Command::SUCCESS;
     }
 }

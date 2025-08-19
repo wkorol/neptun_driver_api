@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://raw.githubusercontent.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+
+    <entity name="App\Hotel\Domain\Hotel" table="hotel">
+        <id name="id" type="uuid" column="id">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="name" column="name" type="string" length="255" unique="true" />
+
+        <many-to-one field="region" target-entity="App\Region\Domain\Region" inversed-by="hotels">
+            <join-column name="region_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
+
+        <many-to-one field="lumpSums" target-entity="App\LumpSums\Domain\LumpSums">
+            <join-column name="lump_sums_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
+
+        <field name="lumpSumsExpireDate" column="lump_sums_expire_date" type="datetime_immutable" nullable="true" />
+
+        <many-to-one field="newLumpSums" target-entity="App\LumpSums\Domain\LumpSums">
+            <join-column name="new_lump_sums_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
+
+        <field name="updateDate" column="update_date" type="datetime_immutable" nullable="true" />
+    </entity>
+
+</doctrine-mapping>

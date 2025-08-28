@@ -15,7 +15,6 @@ use Doctrine\Common\Collections\Collection;
  *     name: ?string
  * }
  */
-#[ApiResource]
 class Region implements \JsonSerializable
 {
     /** @var Collection<int, Hotel> */

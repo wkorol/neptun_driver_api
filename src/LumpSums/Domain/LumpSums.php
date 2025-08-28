@@ -20,7 +20,6 @@ use Symfony\Component\Uid\Uuid;
  *     fixedValues: FixedPrice[]
  * }
  */
-#[ApiResource]
 class LumpSums implements \JsonSerializable
 {
     /** @var Collection<int, Hotel> */

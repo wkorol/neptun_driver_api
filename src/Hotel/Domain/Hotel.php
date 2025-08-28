@@ -23,7 +23,6 @@ use Symfony\Component\Uid\Uuid;
  *     update_date: ?string
  * }
  */
-#[ApiResource]
 class Hotel implements \JsonSerializable
 {
     public function __construct(

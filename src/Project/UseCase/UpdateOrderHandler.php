@@ -31,12 +31,15 @@ readonly class UpdateOrderHandler
 
         $changed = false;
 
-        $plannedArrivalDate = $command->plannedArrivalDate ?? null;
+        $plannedArrivalDate = $command->plannedArrivalDate
+            ? new \DateTimeImmutable($command->plannedArrivalDate)
+            : null;
+        $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
         if (
-            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDate?->getTimestamp()
+            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
         ) {
-            $order->setArrivalDate($plannedArrivalDate);
+            $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
             $changed = true;
         }
 

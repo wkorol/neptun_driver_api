@@ -8,7 +8,7 @@ readonly class Command
 {
     public function __construct(
         public ?int $externalId = null,
-        public ?\DateTimeImmutable $plannedArrivalDate = null,
+        public ?string $plannedArrivalDate = null,
         public ?int $status = null,
         public ?string $notes = null,
         public ?string $phoneNumber = null,

@@ -32,12 +32,11 @@ readonly class UpdateOrderHandler
         $changed = false;
 
         $plannedArrivalDate = $command->plannedArrivalDate ?? null;
-        $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
 
         if (
-            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
+            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDate?->getTimestamp()
         ) {
-            $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
+            $order->setArrivalDate($plannedArrivalDate);
             $changed = true;
         }
 

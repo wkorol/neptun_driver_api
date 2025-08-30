@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Order\Domain\Order;
 use App\Order\Repository\OrderRepository;
 use App\Project\UseCase\DeleteAllFinishedOrders;
 use App\Project\UseCase\DeleteAllFinishedOrdersHandler;
@@ -13,6 +14,7 @@ use App\Service\MamTaxiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class OrderController extends AbstractController
@@ -45,24 +47,33 @@ class OrderController extends AbstractController
     }
 
     #[Route('/orders/update/actual', name: 'update_all_existing_orders', methods: ['GET'])]
-    public function updateAllExistingOrders(): JsonResponse
+    public function updateAllExistingOrders(Request $request): JsonResponse
     {
+        $updateAll = $request->get('all', false);
+        $orders = null;
+        if ($updateAll) {
+            $orders = $this->orderRepository->all();
+        }
         $scheduledOrdersForToday = $this->orderRepository->findScheduledOrdersForToday();
         $ordersForNext5Days = $this->orderRepository->findScheduledOrdersForNext5Days();
         $actualOrders = $this->orderRepository->findActualOrders();
-        $orders = array_merge($scheduledOrdersForToday, $ordersForNext5Days, $actualOrders);
+        if (!$orders) {
+            $orders = array_merge($scheduledOrdersForToday, $ordersForNext5Days, $actualOrders);
+        }
+
         $updatedCount = 0;
         $batchSize = 100;
-
         if ($orders) {
             $chunks = array_chunk($orders, $batchSize);
             foreach ($chunks as $chunk) {
+                /**
+                 * @var Order $order
+                 */
                 foreach ($chunk as $order) {
-                    $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId());
-
+                    $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId(), $order->getExternalOrderId());
                     if ($this->updateOrderHandler->__invoke(new Command(
                         $data['Id'],
-                        $data['PlannedArrivalDate'],
+                        $data['PlannedArrivalDate'] ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null,
                         $data['Status'],
                         $data['Notes'],
                         $data['PhoneNumber'],

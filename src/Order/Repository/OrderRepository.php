@@ -28,4 +28,9 @@ interface OrderRepository
     public function deleteAllFinished(): void;
 
     public function save(Order $order): void;
+
+    /**
+     * @return Order[]
+     */
+    public function all(): array;
 }

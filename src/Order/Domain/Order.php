@@ -25,7 +25,8 @@ use Symfony\Component\Uid\Uuid;
  *     CompanyName: ?string,
  *     Price: ?float,
  *     PassengersCount: ?int,
- *     PaymentMethod: ?int
+ *     PaymentMethod: ?int,
+ *     ExternalOrderId: ?int,
  * }
  */
 class Order implements \JsonSerializable
@@ -48,6 +49,7 @@ class Order implements \JsonSerializable
         private ?float $price,
         private ?int $passengerCount,
         private ?int $paymentMethod,
+        private ?int $externalOrderId,
     ) {
     }
 
@@ -211,6 +213,16 @@ class Order implements \JsonSerializable
         $this->paymentMethod = $paymentMethod;
     }
 
+    public function getExternalOrderId(): ?int
+    {
+        return $this->externalOrderId;
+    }
+
+    public function setExternalOrderId(?int $externalOrderId): void
+    {
+        $this->externalOrderId = $externalOrderId;
+    }
+
     /**
      * @return OrderArray
      */
@@ -233,6 +245,7 @@ class Order implements \JsonSerializable
             'Price' => $this->getPrice(),
             'PassengersCount' => $this->getPassengerCount(),
             'PaymentMethod' => $this->getPaymentMethod(),
+            'ExternalOrderId' => $this->getExternalOrderId(),
         ];
     }
 }

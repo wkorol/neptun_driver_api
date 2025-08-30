@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Hotel\Domain;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\LumpSums\Domain\LumpSums;
 use App\Region\Domain\Region;
 use Symfony\Component\Uid\Uuid;

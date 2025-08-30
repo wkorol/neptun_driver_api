@@ -8,7 +8,7 @@ readonly class Command
 {
     public function __construct(
         public ?int $externalId = null,
-        public ?string $plannedArrivalDate = null,
+        public ?\DateTimeImmutable $plannedArrivalDate = null,
         public ?int $status = null,
         public ?string $notes = null,
         public ?string $phoneNumber = null,
@@ -16,6 +16,8 @@ readonly class Command
         public ?float $price = null,
         public ?int $passengerCount = null,
         public ?int $paymentMethod = null,
+        public ?string $taxiNumber = null,
+        public ?int $externalOrderId = null,
     ) {
     }
 }

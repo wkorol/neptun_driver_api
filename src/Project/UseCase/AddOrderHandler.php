@@ -29,7 +29,9 @@ readonly class AddOrderHandler
                 $command->order->getCompanyName(),
                 $command->order->getPrice(),
                 $command->order->getPassengerCount(),
-                $command->order->getPaymentMethod()
+                $command->order->getPaymentMethod(),
+                $command->order->getTaxiNumber(),
+                $command->order->getExternalOrderId()
             ));
 
             return;

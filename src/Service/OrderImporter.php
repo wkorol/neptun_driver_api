@@ -23,6 +23,7 @@ class OrderImporter
             if (null === $externalId) {
                 continue;
             }
+            $externalOrderId = $data['ExternalOrderId'] ?? null;
 
             $createdAt = new \DateTimeImmutable($data['CreationDate']);
             $status = $data['Status'];
@@ -64,7 +65,8 @@ class OrderImporter
                     companyName: $companyName,
                     price: $price,
                     passengerCount: $passengerCount,
-                    paymentMethod: $paymentMethod
+                    paymentMethod: $paymentMethod,
+                    externalOrderId: $externalOrderId
                 );
             } catch (\Exception $e) {
                 dd($e->getMessage().'External id: '.$externalId.'Status: '.$status);

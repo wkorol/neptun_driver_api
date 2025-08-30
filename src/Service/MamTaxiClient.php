@@ -195,7 +195,7 @@ class MamTaxiClient
                 foreach ($orders as $order) {
                     $details = [];
                     try {
-                        $details = $this->fetchOrderDetails($order['Id']);
+                        $details = $this->fetchOrderDetails($order['Id'], $order['ExternalOrderId']);
                     } catch (\Throwable $e) {
                     }
 
@@ -234,7 +234,7 @@ class MamTaxiClient
 
     public function fetchOrdersWithDetails(?int $howMany = 200): array
     {
-        $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&columns[0][data]=Id&columns[0][name]=StartDate&columns[0][searchable]=true&columns[0][search][value]=&columns[0][search][regex]=false&columns[1][data]=CreationDate&columns[1][name]=CreationDate&columns[1][searchable]=true&columns[1][orderable]=false&columns[1][search][value]=&columns[1][search][regex]=false&columns[2][data]=ExternalOrderId&columns[2][name]=ExternalOrderId&columns[2][searchable]=true&columns[2][orderable]=false&columns[2][search][value]=&columns[2][search][regex]=false&columns[3][data]=From&columns[3][name]=From&columns[3][searchable]=true&columns[3][orderable]=false&columns[3][search][value]=&columns[3][search][regex]=false&columns[4][data]=Destination&columns[4][name]=Destination&columns[4][searchable]=true&columns[4][orderable]=false&columns[4][search][value]=&columns[4][search][regex]=false&columns[5][data]=TaxiNumber&columns[5][name]=TaxiNumber&columns[5][searchable]=true&columns[5][orderable]=false&columns[5][search][value]=&columns[5][search][regex]=false&columns[6][data]=Price&columns[6][name]=Price&columns[6][searchable]=true&columns[6][orderable]=false&columns[6][search][value]=&columns[6][search][regex]=false&columns[7][data]=StatusCode&columns[7][name]=StatusCode&columns[7][searchable]=true&columns[7][orderable]=false&columns[7][search][value]=&columns[7][search][regex]=false&columns[8][data]=PaymentMethodCode&columns[8][name]=Payments&columns[8][searchable]=true&columns[8][orderable]=false&columns[8][search][value]=&columns[8][search][regex]=false&columns[9][data]=SecondPaymentMethodCode&columns[9][name]=CashlessPayments&columns[9][searchable]=true&columns[9][orderable]=false&columns[9][search][value]=&columns[9][search][regex]=false&columns[10][data]=Id&columns[10][name]=Id&columns[10][searchable]=true&columns[10][orderable]=false&columns[10][search][value]=&columns[10][search][regex]=false&columns[11][data]=PlannedArrivalDate&columns[11][name]=PlannedArrivalDate&columns[11][searchable]=true&columns[11][orderable]=false&columns[11][search][value]=&columns[11][search][regex]=false&order[0][column]=1&order[0][dir]=desc&start=0&length=$howMany&search[value]=&search[regex]=false&columns[0][orderable]=false&contextTypeId=6");
+        $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=0&length=$howMany&search[value]=&search[regex]=true");
 
         $json = json_decode($response->getBody()->getContents(), true);
 
@@ -267,21 +267,29 @@ class MamTaxiClient
         return $merged;
     }
 
-    public function fetchOrderDetails(int $id): array
+    public function fetchOrderDetails(int $id, int $externalOrderId): array
     {
         if (!$this->isSessionValid()) {
             if (!$this->login()) {
                 throw new \Exception('Failed');
             }
         }
-        $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
+        $firstResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=0&length=1&search[value]=Id=$externalOrderId&search[regex]=true", [
             'headers' => [
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Referer' => $this->baseUrl.'/',
             ],
         ]);
+        $secondResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
+            'headers' => [
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Referer' => $this->baseUrl.'/',
+            ],
+        ]);
+        $firstResponseArray = json_decode($firstResponse->getBody()->getContents(), true);
+        $secondResponseArray = json_decode($secondResponse->getBody()->getContents(), true);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return array_merge($firstResponseArray['data'][0], $secondResponseArray);
     }
 
     public function findDriver(string $id): JsonResponse

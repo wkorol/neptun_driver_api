@@ -31,16 +31,15 @@ readonly class UpdateOrderHandler
 
         $changed = false;
 
-        $plannedArrivalDate = $command->plannedArrivalDate
-            ? new \DateTimeImmutable($command->plannedArrivalDate)
-            : null;
-        $plannedArrivalDatePlusTwoHours = $plannedArrivalDate?->modify('+2 hours');
-
-        if (
-            $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours?->getTimestamp()
-        ) {
-            $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
-            $changed = true;
+        $plannedArrivalDate = $command->plannedArrivalDate;
+        if ($plannedArrivalDate) {
+            $plannedArrivalDatePlusTwoHours = $plannedArrivalDate->modify('+2 hours');
+            if (
+                $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours->getTimestamp()
+            ) {
+                $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
+                $changed = true;
+            }
         }
 
         if ($order->getStatus()?->value !== $command->status) {
@@ -75,6 +74,16 @@ readonly class UpdateOrderHandler
 
         if ($order->getPaymentMethod() !== $command->paymentMethod) {
             $order->setPaymentMethod($command->paymentMethod);
+            $changed = true;
+        }
+
+        if ($order->getTaxiNumber() !== $command->taxiNumber) {
+            $order->setTaxiNumber($command->taxiNumber);
+            $changed = true;
+        }
+
+        if ($order->getExternalOrderId() !== $command->externalId) {
+            $order->setExternalOrderId($command->externalOrderId);
             $changed = true;
         }
 

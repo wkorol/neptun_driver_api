@@ -92,4 +92,12 @@ readonly class ORMOrderRepository implements OrderRepository
         $this->entityManager->persist($order);
         $this->entityManager->flush();
     }
+
+    /**
+     * @return Order[]
+     */
+    public function all(): array
+    {
+        return $this->entityManager->getRepository(Order::class)->findAll();
+    }
 }

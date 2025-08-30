@@ -25,6 +25,7 @@
         <field name="price" column="price" type="float" nullable="true" />
         <field name="passengerCount" column="passenger_count" type="integer" nullable="true" />
         <field name="paymentMethod" column="payment_method" type="integer" nullable="true" />
+        <field name="externalOrderId" column="external_order_id" type="integer" nullable="true" />
     </entity>
 
 </doctrine-mapping>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Region\Domain;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Hotel\Domain\Hotel;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

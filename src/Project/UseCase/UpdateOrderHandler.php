@@ -82,7 +82,7 @@ readonly class UpdateOrderHandler
             $changed = true;
         }
 
-        if ($order->getExternalOrderId() !== $command->externalId) {
+        if ($order->getExternalOrderId() !== $command->externalOrderId) {
             $order->setExternalOrderId($command->externalOrderId);
             $changed = true;
         }

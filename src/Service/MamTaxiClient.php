@@ -195,7 +195,7 @@ class MamTaxiClient
                 foreach ($orders as $order) {
                     $details = [];
                     try {
-                        $details = $this->fetchOrderDetails($order['Id'], $order['ExternalOrderId']);
+                        $details = $this->fetchOrderDetails($order['Id']);
                     } catch (\Throwable $e) {
                     }
 
@@ -267,29 +267,34 @@ class MamTaxiClient
         return $merged;
     }
 
-    public function fetchOrderDetails(int $id, int $externalOrderId): array
+    public function fetchOrderDetails(int $id): array
     {
         if (!$this->isSessionValid()) {
             if (!$this->login()) {
                 throw new \Exception('Failed');
             }
         }
-        $firstResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=0&length=1&search[value]=Id=$externalOrderId&search[regex]=true", [
-            'headers' => [
-                'X-Requested-With' => 'XMLHttpRequest',
-                'Referer' => $this->baseUrl.'/',
-            ],
-        ]);
-        $secondResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
+
+        $firstResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders/{$id}", [
             'headers' => [
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Referer' => $this->baseUrl.'/',
             ],
         ]);
         $firstResponseArray = json_decode($firstResponse->getBody()->getContents(), true);
+        $externalOrderId = $firstResponseArray['ExternalOrderId'];
+        $secondResponse = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=0&length=1&search[value]=ExternalOrderId=$externalOrderId&search[regex]=true", [
+            'headers' => [
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Referer' => $this->baseUrl.'/',
+            ],
+        ]);
         $secondResponseArray = json_decode($secondResponse->getBody()->getContents(), true);
 
-        return array_merge($firstResponseArray['data'][0], $secondResponseArray);
+        return [
+            'firstResponse' => $firstResponseArray,
+            'secondResponse' => $secondResponseArray['data'][0] ?? [],
+        ];
     }
 
     public function findDriver(string $id): JsonResponse

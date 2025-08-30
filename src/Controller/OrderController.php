@@ -70,17 +70,19 @@ class OrderController extends AbstractController
                  * @var Order $order
                  */
                 foreach ($chunk as $order) {
-                    $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId(), $order->getExternalOrderId());
+                    $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId());
                     if ($this->updateOrderHandler->__invoke(new Command(
-                        $data['Id'],
-                        $data['PlannedArrivalDate'] ? new \DateTimeImmutable($data['PlannedArrivalDate']) : null,
-                        $data['Status'],
-                        $data['Notes'],
-                        $data['PhoneNumber'],
-                        $data['CompanyName'],
-                        $data['Price'],
-                        $data['PassengersCount'],
-                        $data['PaymentMethod'],
+                        $data['firstResponse']['Id'],
+                        $data['firstResponse']['PlannedArrivalDate'] ? new \DateTimeImmutable($data['firstResponse']['PlannedArrivalDate']) : null,
+                        $data['firstResponse']['Status'],
+                        $data['firstResponse']['Notes'],
+                        $data['firstResponse']['PhoneNumber'],
+                        $data['firstResponse']['CompanyName'],
+                        $data['firstResponse']['Price'],
+                        $data['firstResponse']['PassengersCount'],
+                        $data['firstResponse']['PaymentMethod'],
+                        $data['secondResponse']['TaxiNumber'],
+                        $data['firstResponse']['ExternalOrderId'],
                     ))) {
                         ++$updatedCount;
                     }

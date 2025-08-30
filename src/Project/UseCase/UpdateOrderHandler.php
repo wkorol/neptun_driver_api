@@ -29,15 +29,14 @@ readonly class UpdateOrderHandler
             throw new NotFoundHttpException(sprintf('Order with externalId %d not found.', $command->externalId));
         }
 
-        $changed = false;
 
+        $changed = false;
         $plannedArrivalDate = $command->plannedArrivalDate;
         if ($plannedArrivalDate) {
-            $plannedArrivalDatePlusTwoHours = $plannedArrivalDate->modify('+2 hours');
             if (
-                $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDatePlusTwoHours->getTimestamp()
+                $order->getPlannedArrivalDate()?->getTimestamp() !== $plannedArrivalDate->getTimestamp()
             ) {
-                $order->setArrivalDate($plannedArrivalDatePlusTwoHours);
+                $order->setArrivalDate($plannedArrivalDate);
                 $changed = true;
             }
         }

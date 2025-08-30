@@ -73,7 +73,7 @@ class OrderController extends AbstractController
                     $data = $this->mamTaxiClient->fetchOrderDetails($order->getExternalId());
                     if ($this->updateOrderHandler->__invoke(new Command(
                         $data['firstResponse']['Id'],
-                        $data['firstResponse']['PlannedArrivalDate'] ? new \DateTimeImmutable($data['firstResponse']['PlannedArrivalDate']) : null,
+                        $data['firstResponse']['PlannedArrivalDate'] ? (new \DateTimeImmutable($data['firstResponse']['PlannedArrivalDate']))->modify('+2hour') : null,
                         $data['firstResponse']['Status'],
                         $data['firstResponse']['Notes'],
                         $data['firstResponse']['PhoneNumber'],

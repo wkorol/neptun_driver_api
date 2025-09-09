@@ -60,7 +60,8 @@ class HotelController extends AbstractController
             $region,
             $lumpSums,
             isset($data['lumpSumsExpireDate']) ? new \DateTimeImmutable($data['lumpSumsExpireDate']) : null,
-            $newLumpSums
+            $newLumpSums,
+            updateDate: new \DateTimeImmutable()
         );
 
         try {

@@ -45,9 +45,9 @@ class HotelController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $region = $this->regionRepository->findById($data['regionId']);
-        $lumpSums = $this->lumpSumsRepository->find($data['lumpSumsId']);
+        $lumpSums = $this->lumpSumsRepository->find(Uuid::fromString($data['lumpSumsId']));
         $newLumpSums = isset($data['newLumpSumsId'])
-            ? $this->lumpSumsRepository->find($data['newLumpSumsId'])
+            ? $this->lumpSumsRepository->find(Uuid::fromString($data['newLumpSumsId']))
             : null;
 
         if (!$region || !$lumpSums) {

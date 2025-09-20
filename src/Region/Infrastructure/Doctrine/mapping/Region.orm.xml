@@ -12,6 +12,7 @@
         <field name="name" column="name" type="string" length="255" />
 
         <field name="position" column="position" type="integer" unique="true" nullable="true" />
+        <field name="imgLink" column="img_link" type="string" nullable="true" />
 
         <one-to-many field="hotels" target-entity="App\Hotel\Domain\Hotel" mapped-by="region" />
     </entity>

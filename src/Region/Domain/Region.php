@@ -11,7 +11,9 @@ use Doctrine\Common\Collections\Collection;
 /**
  * @phpstan-type RegionArray array{
  *     id: ?int,
- *     name: ?string
+ *     name: ?string,
+ *     position: ?int,
+ *     imgLink: ?string,
  * }
  */
 class Region implements \JsonSerializable
@@ -23,6 +25,7 @@ class Region implements \JsonSerializable
         private ?int $id,
         private ?string $name,
         private ?int $position = null,
+        private ?string $imgLink = null,
     ) {
         $this->hotels = new ArrayCollection();
     }
@@ -83,6 +86,7 @@ class Region implements \JsonSerializable
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'imgLink' => $this->imgLink
         ];
     }
 }

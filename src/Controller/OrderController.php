@@ -55,6 +55,31 @@ class OrderController extends AbstractController
         );
     }
 
+    #[Route('/orders/find-history-batch', name: 'orders_find_history_batch', methods: ['POST'])]
+    public function findHistoryBatch(Request $request): JsonResponse
+    {
+        // działa dla JSON!
+        $payload = $request->toArray();
+        $phonesData = $payload['phones'] ?? null;
+
+        if (!$phonesData || !is_array($phonesData)) {
+            return new JsonResponse(['error' => 'Invalid payload'], 400);
+        }
+
+        $result = [];
+
+        foreach ($phonesData as $phone => $excludedIds) {
+            $result[$phone] = $this->orderRepository->findLast3OrdersWithPhoneExcluding(
+                $phone,
+                $excludedIds ?? []
+            );
+        }
+
+        return new JsonResponse($result);
+    }
+
+
+
     #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
     public function getActualOrders(): JsonResponse
     {

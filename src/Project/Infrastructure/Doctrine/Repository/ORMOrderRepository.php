@@ -115,4 +115,21 @@ readonly class ORMOrderRepository implements OrderRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findLast3OrdersWithPhoneExcluding(string $phoneNumber, array $excludedExternalIds): array
+    {
+        $qb = $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+            ->where('o.phoneNumber = :phone')
+            ->setParameter('phone', $phoneNumber)
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults(3);
+
+        if (!empty($excludedExternalIds)) {
+            $qb->andWhere($qb->expr()->notIn('o.externalId', ':excluded'))
+                ->setParameter('excluded', $excludedExternalIds);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 }

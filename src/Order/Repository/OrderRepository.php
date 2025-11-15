@@ -34,6 +34,8 @@ interface OrderRepository
 
     public function save(Order $order): void;
 
+    public function findLast3OrdersWithPhoneExcluding(string $phoneNumber, array $excludedExternalIds): array;
+
     /**
      * @return Order[]
      */

@@ -40,6 +40,21 @@ class OrderController extends AbstractController
         return new JsonResponse($this->orderRepository->findScheduledOrdersForNext5Days());
     }
 
+    #[Route('/orders/find-by-phone', name: 'orders_find-by-phone', methods: ['GET'])]
+    public function findOrdersByPhoneNumber(Request $request): JsonResponse
+    {
+        $phoneNumber = $request->query->get('phoneNumber');
+        $externalId = $request->query->getInt('externalId');
+
+        if (!$phoneNumber) {
+            return new JsonResponse(['error' => 'Missing phone parameter'], 400);
+        }
+
+        return new JsonResponse(
+            $this->orderRepository->findLast3OrdersWithPhoneNumber($phoneNumber, $externalId)
+        );
+    }
+
     #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
     public function getActualOrders(): JsonResponse
     {

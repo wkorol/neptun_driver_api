@@ -100,4 +100,19 @@ readonly class ORMOrderRepository implements OrderRepository
     {
         return $this->entityManager->getRepository(Order::class)->findAll();
     }
+
+    public function findLast3OrdersWithPhoneNumber(string $phoneNumber, int $externalId): ?array
+    {
+        return $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+            ->where('o.phoneNumber = :phoneNumber')
+            ->andWhere('o.phoneNumber != :excluded')
+            ->andWhere('o.externalId != :externalId')
+            ->setParameter('excluded', '0048585111555')
+            ->setParameter('phoneNumber', $phoneNumber)
+            ->setParameter('externalId', $externalId)
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+    }
 }

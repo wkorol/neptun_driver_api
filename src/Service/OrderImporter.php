@@ -40,8 +40,8 @@ class OrderImporter
                 continue;
             }
 
-            $createdAtPlusTwoHour = $createdAt?->modify('+2 hour');
-            $plannedArrivalDatePlusTwoHour = $plannedArrivalDate?->modify('+2 hour');
+            $createdAtPlusTwoHour = $createdAt?->modify('+1 hour');
+            $plannedArrivalDatePlusTwoHour = $plannedArrivalDate?->modify('+1 hour');
             $companyName = $data['CompanyName'] ?? null;
             $price = $data['Price'] ?? null;
             $passengerCount = $data['PassengersCount'] ?? null;

@@ -52,7 +52,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 COPY docker/dev/import-orders-loop.sh /usr/local/bin/import-orders-loop.sh
 RUN chmod +x /usr/local/bin/import-orders-loop.sh
 ENV IMPORT_LOOP_URL=https://apineptun-ij5mx.ondigitalocean.app/api/proxy/import-orders/5
-ENV IMPORT_LOOP_INTERVAL=5
+ENV IMPORT_LOOP_INTERVAL=3
 
 # Set the custom entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

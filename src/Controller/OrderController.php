@@ -42,6 +42,46 @@ class OrderController extends AbstractController
         return new JsonResponse($this->orderRepository->findScheduledOrdersForNext5Days());
     }
 
+    #[Route('/orders/find-by-phone', name: 'orders_find-by-phone', methods: ['GET'])]
+    public function findOrdersByPhoneNumber(Request $request): JsonResponse
+    {
+        $phoneNumber = $request->query->get('phoneNumber');
+        $externalId = $request->query->getInt('externalId');
+
+        if (!$phoneNumber) {
+            return new JsonResponse(['error' => 'Missing phone parameter'], 400);
+        }
+
+        return new JsonResponse(
+            $this->orderRepository->findLast3OrdersWithPhoneNumber($phoneNumber, $externalId)
+        );
+    }
+
+    #[Route('/orders/find-history-batch', name: 'orders_find_history_batch', methods: ['POST'])]
+    public function findHistoryBatch(Request $request): JsonResponse
+    {
+        // działa dla JSON!
+        $payload = $request->toArray();
+        $phonesData = $payload['phones'] ?? null;
+
+        if (!$phonesData || !is_array($phonesData)) {
+            return new JsonResponse(['error' => 'Invalid payload'], 400);
+        }
+
+        $result = [];
+
+        foreach ($phonesData as $phone => $excludedIds) {
+            $result[$phone] = $this->orderRepository->findLast3OrdersWithPhoneExcluding(
+                $phone,
+                $excludedIds ?? []
+            );
+        }
+
+        return new JsonResponse($result);
+    }
+
+
+
     #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
     public function getActualOrders(): JsonResponse
     {

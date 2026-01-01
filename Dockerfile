@@ -20,6 +20,9 @@ COPY --from=composer/composer:2.7.7-bin /composer /usr/bin/composer
 # Set the working directory inside the container
 WORKDIR /var/www/html
 
+# Choose cron environment at build time
+ARG CRON_ENV=prod
+
 # Copy application files and Apache configuration
 COPY . /var/www/html
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
@@ -35,8 +38,11 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 RUN echo "date.timezone=Europe/Warsaw" > /usr/local/etc/php/conf.d/timezone.ini
 
 # Copy and set up cron
-COPY cronjob /etc/cron.d/symfony-cron
-RUN chmod 0644 /etc/cron.d/symfony-cron && crontab /etc/cron.d/symfony-cron
+COPY cronjob.prod /etc/cron.d/symfony-cron.prod
+COPY cronjob.dev /etc/cron.d/symfony-cron.dev
+RUN if [ "$CRON_ENV" = "dev" ]; then cp /etc/cron.d/symfony-cron.dev /etc/cron.d/symfony-cron; \
+    else cp /etc/cron.d/symfony-cron.prod /etc/cron.d/symfony-cron; fi && \
+    chmod 0644 /etc/cron.d/symfony-cron && crontab /etc/cron.d/symfony-cron
 
 # Copy the entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

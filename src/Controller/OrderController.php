@@ -11,6 +11,7 @@ use App\Project\UseCase\DeleteAllFinishedOrdersHandler;
 use App\Project\UseCase\UpdateOrder\Command;
 use App\Project\UseCase\UpdateOrderHandler;
 use App\Service\MamTaxiClient;
+use App\Service\OrderUpdatesTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +26,7 @@ class OrderController extends AbstractController
         private EntityManagerInterface $entityManager,
         private UpdateOrderHandler $updateOrderHandler,
         private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler,
+        private OrderUpdatesTracker $updatesTracker,
     ) {
     }
 
@@ -44,6 +46,39 @@ class OrderController extends AbstractController
     public function getActualOrders(): JsonResponse
     {
         return new JsonResponse($this->orderRepository->findActualOrders());
+    }
+
+    #[Route('/orders/find-history-batch', name: 'orders_find_history_batch', methods: ['POST'])]
+    public function findHistoryBatch(Request $request): JsonResponse
+    {
+        $payload = $request->toArray();
+        $phones = $payload['phones'] ?? [];
+        if (!is_array($phones)) {
+            return new JsonResponse(['error' => 'Invalid payload'], 400);
+        }
+
+        $result = [];
+        foreach ($phones as $phone => $excludedIds) {
+            if (!is_string($phone) || '' === trim($phone)) {
+                continue;
+            }
+            $excludedIds = is_array($excludedIds) ? $excludedIds : [];
+
+            $qb = $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+                ->where('o.phoneNumber = :phone')
+                ->setParameter('phone', $phone)
+                ->orderBy('o.createdAt', 'DESC')
+                ->setMaxResults(5);
+
+            if (count($excludedIds) > 0) {
+                $qb->andWhere($qb->expr()->notIn('o.externalId', ':excludedIds'))
+                    ->setParameter('excludedIds', $excludedIds);
+            }
+
+            $result[$phone] = $qb->getQuery()->getResult();
+        }
+
+        return new JsonResponse($result);
     }
 
     #[Route('/orders/update/actual', name: 'update_all_existing_orders', methods: ['GET'])]
@@ -93,6 +128,10 @@ class OrderController extends AbstractController
             }
         }
 
+        if ($updatedCount > 0) {
+            $this->updatesTracker->touch();
+        }
+
         return new JsonResponse("Updated {$updatedCount} orders");
     }
 
@@ -100,6 +139,7 @@ class OrderController extends AbstractController
     public function deleteAllFinished(): JsonResponse
     {
         $this->deleteAllFinishedOrdersHandler->__invoke(new DeleteAllFinishedOrders\Command());
+        $this->updatesTracker->touch();
 
         return new JsonResponse('Deleted finished orders');
     }

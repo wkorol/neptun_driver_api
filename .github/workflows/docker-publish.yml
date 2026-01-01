@@ -25,7 +25,7 @@ jobs:
         run: mv .env.prod .env
 
       - name: Build Docker Image
-        run: docker build -t ghcr.io/wkorol/neptun_driver_api:latest .
+        run: docker build --build-arg CRON_ENV=prod -t ghcr.io/wkorol/neptun_driver_api:latest .
 
       - name: Push to GitHub Container Registry
         run: docker push ghcr.io/wkorol/neptun_driver_api:latest
@@ -39,4 +39,3 @@ jobs:
           curl -X POST -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${DO_API_TOKEN}" \
           https://api.digitalocean.com/v2/apps/${DO_APP_ID}/deployments
-

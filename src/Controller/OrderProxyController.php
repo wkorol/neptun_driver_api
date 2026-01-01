@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\MamTaxiClient;
+use App\Service\OrderUpdatesTracker;
 use App\Service\OrderImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -72,7 +73,12 @@ class OrderProxyController extends AbstractController
     }
 
     #[Route('/api/proxy/import-orders/{howMany}', name: 'admin_import_orders')]
-    public function importOrdersFromExternalApi(MamTaxiClient $client, OrderImporter $importer, string $howMany): JsonResponse
+    public function importOrdersFromExternalApi(
+        MamTaxiClient $client,
+        OrderImporter $importer,
+        OrderUpdatesTracker $updatesTracker,
+        string $howMany
+    ): JsonResponse
     {
         if (!$client->isSessionValid()) {
             $client->login();
@@ -81,6 +87,7 @@ class OrderProxyController extends AbstractController
         $orders = $client->fetchOrdersWithDetails((int) $howMany);
 
         $importer->importFromArray($orders);
+        $updatesTracker->touch();
 
         return new JsonResponse('Import complete');
     }

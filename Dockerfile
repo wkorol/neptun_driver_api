@@ -6,7 +6,7 @@ ENV TZ=Europe/Warsaw
 
 # Install necessary packages, tzdata, and PHP extensions
 RUN apt-get -y update && apt-get -y upgrade && \
-    apt-get -y install wget libpq-dev libzip-dev unzip libxml2-dev git bash cron supervisor tzdata && \
+    apt-get -y install wget curl libpq-dev libzip-dev unzip libxml2-dev git bash cron supervisor tzdata && \
     ln -fs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
     docker-php-ext-install pdo pdo_pgsql opcache zip soap intl
@@ -48,8 +48,14 @@ RUN if [ "$CRON_ENV" = "dev" ]; then cp /etc/cron.d/symfony-cron.dev /etc/cron.d
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Import loop (production)
+COPY docker/dev/import-orders-loop.sh /usr/local/bin/import-orders-loop.sh
+RUN chmod +x /usr/local/bin/import-orders-loop.sh
+ENV IMPORT_LOOP_URL=https://apineptun-ij5mx.ondigitalocean.app/api/proxy/import-orders/5
+ENV IMPORT_LOOP_INTERVAL=5
+
 # Set the custom entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-# Start Supervisor, which will manage both Apache and cron
-CMD cron && apache2-foreground
+# Start cron, import loop, and Apache
+CMD ["bash", "-lc", "/usr/local/bin/import-orders-loop.sh & cron && apache2-foreground"]

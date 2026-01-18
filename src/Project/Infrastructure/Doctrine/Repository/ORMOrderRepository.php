@@ -72,6 +72,33 @@ readonly class ORMOrderRepository implements OrderRepository
             ->getResult();
     }
 
+    /**
+     * @return Order[]
+     */
+    public function findOrdersForDay(\DateTimeImmutable $start, \DateTimeImmutable $end, int $offset, int $limit): array
+    {
+        return $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+            ->where('(o.plannedArrivalDate BETWEEN :start AND :end) OR (o.plannedArrivalDate IS NULL AND o.createdAt BETWEEN :start AND :end)')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('o.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countOrdersForDay(\DateTimeImmutable $start, \DateTimeImmutable $end): int
+    {
+        return (int) $this->entityManager->getRepository(Order::class)->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->where('(o.plannedArrivalDate BETWEEN :start AND :end) OR (o.plannedArrivalDate IS NULL AND o.createdAt BETWEEN :start AND :end)')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function deleteAllFinished(): void
     {
         $qb = $this->$this->entityManager->getRepository(Order::class)->createQueryBuilder('o');

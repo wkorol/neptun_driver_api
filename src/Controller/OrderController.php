@@ -42,6 +42,39 @@ class OrderController extends AbstractController
         return new JsonResponse($this->orderRepository->findScheduledOrdersForNext5Days());
     }
 
+    #[Route('/orders/history/by-day', name: 'orders_history_by_day', methods: ['GET'])]
+    public function getOrdersHistoryByDay(Request $request): JsonResponse
+    {
+        $date = $request->query->get('date');
+        $page = max(1, $request->query->getInt('page', 1));
+        $size = $request->query->getInt('size', 20);
+        $size = max(1, min(200, $size));
+
+        if (!$date) {
+            return new JsonResponse(['error' => 'Missing date'], 400);
+        }
+
+        try {
+            $day = new \DateTimeImmutable($date);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Invalid date'], 400);
+        }
+
+        $start = $day->setTime(0, 0, 0);
+        $end = $day->setTime(23, 59, 59);
+        $offset = ($page - 1) * $size;
+
+        $items = $this->orderRepository->findOrdersForDay($start, $end, $offset, $size);
+        $total = $this->orderRepository->countOrdersForDay($start, $end);
+
+        return new JsonResponse([
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'size' => $size,
+        ]);
+    }
+
     #[Route('/orders/find-by-phone', name: 'orders_find-by-phone', methods: ['GET'])]
     public function findOrdersByPhoneNumber(Request $request): JsonResponse
     {
@@ -86,6 +119,16 @@ class OrderController extends AbstractController
     public function getActualOrders(): JsonResponse
     {
         return new JsonResponse($this->orderRepository->findActualOrders());
+    }
+
+    #[Route('/orders/summary', name: 'orders_summary', methods: ['GET'])]
+    public function getOrdersSummary(): JsonResponse
+    {
+        return new JsonResponse([
+            'today' => $this->orderRepository->findScheduledOrdersForToday(),
+            'actual' => $this->orderRepository->findActualOrders(),
+            'next5' => $this->orderRepository->findScheduledOrdersForNext5Days(),
+        ]);
     }
 
     #[Route('/orders/update/actual', name: 'update_all_existing_orders', methods: ['GET'])]

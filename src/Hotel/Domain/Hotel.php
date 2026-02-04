@@ -15,6 +15,7 @@ use Symfony\Component\Uid\Uuid;
  * @phpstan-type HotelArray array{
  *     id: string,
  *     name: string,
+ *     oldName: ?string,
  *     region: ?RegionArray,
  *     lump_sums: ?LumpSumsArray,
  *     lump_sums_expire_date: ?string,
@@ -32,6 +33,7 @@ class Hotel implements \JsonSerializable
         private ?\DateTimeImmutable $lumpSumsExpireDate = null,
         private ?LumpSums $newLumpSums = null,
         private ?\DateTimeImmutable $updateDate = null,
+        private ?string $oldName = null,
     ) {
     }
 
@@ -68,6 +70,11 @@ class Hotel implements \JsonSerializable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getOldName(): ?string
+    {
+        return $this->oldName;
     }
 
     public function updateName(string $name): void
@@ -123,6 +130,7 @@ class Hotel implements \JsonSerializable
         return [
             'id' => $this->id->toString(),
             'name' => $this->name,
+            'oldName' => $this->oldName,
             'region' => $this->region?->jsonSerialize(),
             'lump_sums' => $this->lumpSums?->jsonSerialize(),
             'lump_sums_expire_date' => $this->lumpSumsExpireDate?->format('Y-m-d H:i:s'),

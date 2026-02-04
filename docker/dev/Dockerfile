@@ -8,3 +8,10 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
+
+COPY ./docker/dev/import-orders-loop.sh /usr/local/bin/import-orders-loop.sh
+RUN chmod +x /usr/local/bin/import-orders-loop.sh
+ENV IMPORT_LOOP_URL=http://localhost/api/proxy/import-orders/5
+ENV IMPORT_LOOP_INTERVAL=3
+
+CMD ["bash", "-lc", "/usr/local/bin/import-orders-loop.sh & apache2-foreground"]

@@ -21,25 +21,34 @@ class TaximeterController extends AbstractController
     #[Route('/api/price-update', name: 'price_update_check', methods: ['GET'])]
     public function checkPriceUpdate(): JsonResponse
     {
-        $addPrice = false;
         $flagPath = $this->getParameter('kernel.project_dir') . '/' . self::FLAG_FILE;
 
-        if (file_exists($flagPath)) {
-            $addPrice = true;
-            // Remove the flag file after reading it (one-time trigger)
-            unlink($flagPath);
+        $addPrice = false;
 
-            $this->logger->info('Price update flag consumed', [
-                'timestamp' => date('Y-m-d H:i:s'),
-                'action' => 'flag_consumed'
-            ]);
+        // Atomowe "przejęcie" flagi: tylko jeden request wygra rename
+        if (is_file($flagPath)) {
+            $consumedPath = $flagPath . '.consumed.' . bin2hex(random_bytes(6));
+
+            if (@rename($flagPath, $consumedPath)) {
+                $addPrice = true;
+                @unlink($consumedPath); // sprzątanie
+
+                $this->logger->info('Price update flag consumed (atomic)', [
+                    'timestamp' => date('Y-m-d H:i:s'),
+                    'action' => 'flag_consumed_atomic'
+                ]);
+            }
         }
 
         return $this->json([
             'add_price' => $addPrice,
             'timestamp' => time(),
             'status' => 'success'
-        ]);
+        ])
+            // bonus: niech proxy/klient nie cache’uje
+            ->setPrivate()
+            ->setMaxAge(0)
+            ->setSharedMaxAge(0);
     }
 
     #[Route('/api/price-update', name: 'price_update_trigger', methods: ['POST'])]
@@ -48,23 +57,29 @@ class TaximeterController extends AbstractController
         $flagPath = $this->getParameter('kernel.project_dir') . '/' . self::FLAG_FILE;
         $flagDir = dirname($flagPath);
 
-        // Create var directory if it doesn't exist
         if (!is_dir($flagDir)) {
             mkdir($flagDir, 0755, true);
         }
 
-        // Set flag to trigger price update
-        file_put_contents($flagPath, date('Y-m-d H:i:s'));
-
-        $this->logger->info('Price update flag set', [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'action' => 'flag_created',
-            'ip' => $request->getClientIp()
-        ]);
+        // ✅ nie nadpisuj jeśli już jest ustawiona (idempotent)
+        if (!file_exists($flagPath)) {
+            file_put_contents($flagPath, date('Y-m-d H:i:s'));
+            $this->logger->info('Price update flag set', [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'action' => 'flag_created',
+                'ip' => $request->getClientIp()
+            ]);
+        } else {
+            $this->logger->info('Price update flag already exists (ignored)', [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'action' => 'flag_exists_ignored',
+                'ip' => $request->getClientIp()
+            ]);
+        }
 
         return $this->json([
             'success' => true,
-            'message' => 'Price update flag set successfully',
+            'message' => 'ok',
             'timestamp' => time()
         ]);
     }

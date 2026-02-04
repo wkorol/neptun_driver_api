@@ -39,5 +39,12 @@ interface OrderRepository
     /**
      * @return Order[]
      */
+    public function findOrdersForDay(\DateTimeImmutable $start, \DateTimeImmutable $end, int $offset, int $limit): array;
+
+    public function countOrdersForDay(\DateTimeImmutable $start, \DateTimeImmutable $end): int;
+
+    /**
+     * @return Order[]
+     */
     public function all(): array;
 }

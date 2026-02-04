@@ -232,39 +232,83 @@ class MamTaxiClient
         }
     }
 
-    public function fetchOrdersWithDetails(?int $howMany = 200): array
+    public function fetchOrdersWithDetails(?int $howMany = 200, int $start = 0, int $detailsConcurrency = 25): array
     {
-        $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=0&length=$howMany&search[value]=&search[regex]=true");
-
-        $json = json_decode($response->getBody()->getContents(), true);
-
-        $orders = $json['data'] ?? [];
-        $promises = [];
-        foreach ($orders as $order) {
-            $orderId = $order['Id'];
-
-            $promises[$orderId] = $this->httpClient->getAsync("/api/5550618/Corporation/124/Orders/{$orderId}", [
-                'headers' => [
-                    'X-Requested-With' => 'XMLHttpRequest',
-                    'Referer' => $this->baseUrl.'/',
-                ],
-            ]);
+        $howMany = max(0, (int) $howMany);
+        $start = max(0, $start);
+        if (0 === $howMany) {
+            return [];
         }
 
-        $results = Promise\Utils::settle($promises)->wait();
-
-        $merged = [];
-        foreach ($orders as $order) {
-            $id = $order['Id'];
-            if (isset($results[$id]['value'])) {
-                $details = json_decode($results[$id]['value']->getBody()->getContents(), true);
-                $merged[] = array_merge($order, $details);
-            } else {
-                $merged[] = $order; // fallback
+        if (!$this->isSessionValid()) {
+            if (!$this->login()) {
+                throw new \Exception('Failed');
             }
         }
 
-        return $merged;
+        $response = $this->httpClient->get("/api/5550618/Corporation/124/Orders?draw=1&start=$start&length=$howMany&search[value]=&search[regex]=true", [
+            'headers' => [
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Referer' => $this->baseUrl.'/',
+            ],
+        ]);
+
+        $json = json_decode($response->getBody()->getContents(), true);
+        $orders = $json['data'] ?? [];
+
+        if (0 === count($orders)) {
+            return [];
+        }
+
+        $detailsByOrderId = [];
+        $requestOrderIds = [];
+        $requests = function () use ($orders, &$requestOrderIds): \Generator {
+            foreach ($orders as $order) {
+                if (!isset($order['Id'])) {
+                    continue;
+                }
+
+                $orderId = (int) $order['Id'];
+                $requestOrderIds[] = $orderId;
+                yield fn () => $this->httpClient->getAsync("/api/5550618/Corporation/124/Orders/{$orderId}", [
+                    'headers' => [
+                        'X-Requested-With' => 'XMLHttpRequest',
+                        'Referer' => $this->baseUrl.'/',
+                    ],
+                ]);
+            }
+        };
+
+        $pool = new Pool($this->httpClient, $requests(), [
+            'concurrency' => max(1, $detailsConcurrency),
+            'fulfilled' => function ($response, $index) use (&$detailsByOrderId, &$requestOrderIds): void {
+                $orderId = $requestOrderIds[$index] ?? null;
+                if (null === $orderId) {
+                    return;
+                }
+
+                $detailsByOrderId[$orderId] = json_decode($response->getBody()->getContents(), true) ?? [];
+            },
+            'rejected' => function ($reason, $index) use (&$detailsByOrderId, &$requestOrderIds): void {
+                $orderId = $requestOrderIds[$index] ?? null;
+                if (null === $orderId) {
+                    return;
+                }
+
+                $detailsByOrderId[$orderId] = [];
+            },
+        ]);
+
+        $pool->promise()->wait();
+
+        return array_map(static function (array $order) use ($detailsByOrderId): array {
+            $orderId = isset($order['Id']) ? (int) $order['Id'] : null;
+            if (null === $orderId || !array_key_exists($orderId, $detailsByOrderId)) {
+                return $order;
+            }
+
+            return array_merge($order, $detailsByOrderId[$orderId]);
+        }, $orders);
     }
 
     public function fetchOrderDetails(int $id): array
@@ -349,7 +393,7 @@ class MamTaxiClient
 
     public function fetchDriverStatuses(): array
     {
-        if ($this->isSessionValid()) {
+        if (!$this->isSessionValid()) {
             $this->login();
         }
         $driverUrls = [

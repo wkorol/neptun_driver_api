@@ -100,12 +100,31 @@ class OrderProxyController extends AbstractController
             $client->login();
         }
 
-        $orders = $client->fetchOrdersWithDetails((int) $howMany);
+        $target = max(1, (int) $howMany);
+        $batchSize = max(1, $request->query->getInt('batchSize', 250));
+        $concurrency = max(1, $request->query->getInt('concurrency', 25));
+        $imported = 0;
 
-        $importer->importFromArray($orders);
-        $updatesTracker->touch();
+        for ($start = 0; $start < $target; $start += $batchSize) {
+            $limit = min($batchSize, $target - $start);
+            $orders = $client->fetchOrdersWithDetails($limit, $start, $concurrency);
+            if ([] === $orders) {
+                break;
+            }
 
-        return new JsonResponse('Import complete');
+            $importer->importFromArray($orders);
+            $imported += count($orders);
+
+            if (count($orders) < $limit) {
+                break;
+            }
+        }
+
+        if ($imported > 0) {
+            $updatesTracker->touch();
+        }
+
+        return new JsonResponse("Import complete ({$imported})");
     }
 
     #[Route('/api/proxy/drivers/status', name: 'proxy_drivers_status')]

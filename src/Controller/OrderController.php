@@ -11,6 +11,7 @@ use App\Project\UseCase\DeleteAllFinishedOrdersHandler;
 use App\Project\UseCase\UpdateOrder\Command;
 use App\Project\UseCase\UpdateOrderHandler;
 use App\Service\MamTaxiClient;
+use App\Service\OrderListTokenValidator;
 use App\Service\OrderUpdatesTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,24 +28,37 @@ class OrderController extends AbstractController
         private UpdateOrderHandler $updateOrderHandler,
         private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler,
         private OrderUpdatesTracker $updatesTracker,
+        private OrderListTokenValidator $tokenValidator,
     ) {
     }
 
     #[Route('/orders/scheduled/today', name: 'orders_scheduled', methods: ['GET'])]
-    public function getScheduledOrdersForToday(): JsonResponse
+    public function getScheduledOrdersForToday(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         return new JsonResponse($this->orderRepository->findScheduledOrdersForToday());
     }
 
     #[Route('/orders/scheduled/next5days', name: 'orders_scheduled_next5days', methods: ['GET'])]
-    public function getScheduledOrdersForNext5Days(): JsonResponse
+    public function getScheduledOrdersForNext5Days(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         return new JsonResponse($this->orderRepository->findScheduledOrdersForNext5Days());
     }
 
     #[Route('/orders/history/by-day', name: 'orders_history_by_day', methods: ['GET'])]
     public function getOrdersHistoryByDay(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         $date = $request->query->get('date');
         $page = max(1, $request->query->getInt('page', 1));
         $size = $request->query->getInt('size', 20);
@@ -78,6 +92,10 @@ class OrderController extends AbstractController
     #[Route('/orders/find-by-phone', name: 'orders_find-by-phone', methods: ['GET'])]
     public function findOrdersByPhoneNumber(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         $phoneNumber = $request->query->get('phoneNumber');
         $externalId = $request->query->getInt('externalId');
 
@@ -93,6 +111,10 @@ class OrderController extends AbstractController
     #[Route('/orders/find-history-batch', name: 'orders_find_history_batch', methods: ['POST'])]
     public function findHistoryBatch(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         // działa dla JSON!
         $payload = $request->toArray();
         $phonesData = $payload['phones'] ?? null;
@@ -116,14 +138,22 @@ class OrderController extends AbstractController
 
 
     #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
-    public function getActualOrders(): JsonResponse
+    public function getActualOrders(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         return new JsonResponse($this->orderRepository->findActualOrders());
     }
 
     #[Route('/orders/summary', name: 'orders_summary', methods: ['GET'])]
-    public function getOrdersSummary(): JsonResponse
+    public function getOrdersSummary(Request $request): JsonResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         return new JsonResponse([
             'today' => $this->orderRepository->findScheduledOrdersForToday(),
             'actual' => $this->orderRepository->findActualOrders(),

@@ -7,16 +7,22 @@ namespace App\Controller;
 use App\Service\MamTaxiClient;
 use App\Service\OrderUpdatesTracker;
 use App\Service\OrderImporter;
+use App\Service\OrderListTokenValidator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class OrderProxyController extends AbstractController
 {
     #[Route('/api/proxy/login', name: 'proxy_login')]
-    public function login(MamTaxiClient $client): JsonResponse
+    public function login(Request $request, MamTaxiClient $client, OrderListTokenValidator $tokenValidator): JsonResponse
     {
+        if ($denied = $tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         if ($client->login()) {
             return $this->json(['message' => 'Logged in']);
         }
@@ -54,8 +60,12 @@ class OrderProxyController extends AbstractController
     }
 
     #[Route('/api/session/check', name: 'check_session')]
-    public function checkSession(MamTaxiClient $client): JsonResponse
+    public function checkSession(Request $request, MamTaxiClient $client, OrderListTokenValidator $tokenValidator): JsonResponse
     {
+        if ($denied = $tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         if ($client->isSessionValid()) {
             return new JsonResponse('Session valid', 200);
         }
@@ -74,12 +84,18 @@ class OrderProxyController extends AbstractController
 
     #[Route('/api/proxy/import-orders/{howMany}', name: 'admin_import_orders')]
     public function importOrdersFromExternalApi(
+        Request $request,
         MamTaxiClient $client,
         OrderImporter $importer,
         OrderUpdatesTracker $updatesTracker,
-        string $howMany
+        string $howMany,
+        OrderListTokenValidator $tokenValidator,
     ): JsonResponse
     {
+        if ($denied = $tokenValidator->denyUnlessValid($request)) {
+            return $denied;
+        }
+
         if (!$client->isSessionValid()) {
             $client->login();
         }

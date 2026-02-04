@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\OrderUpdatesTracker;
+use App\Service\OrderListTokenValidator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -12,13 +13,23 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderUpdatesController extends AbstractController
 {
-    public function __construct(private OrderUpdatesTracker $tracker)
+    public function __construct(
+        private OrderUpdatesTracker $tracker,
+        private OrderListTokenValidator $tokenValidator,
+    )
     {
     }
 
     #[Route('/api/orders/stream', name: 'orders_stream', methods: ['GET'])]
     public function streamOrders(Request $request): StreamedResponse
     {
+        if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
+            return new StreamedResponse(function () use ($denied): void {
+                $payload = $denied->getContent();
+                echo $payload !== false ? $payload : '{"error":"Invalid token"}';
+            }, $denied->getStatusCode(), $denied->headers->all());
+        }
+
         $lastEventId = $request->headers->get('Last-Event-ID');
         $since = $request->query->getInt('since', 0);
         $lastSeen = $lastEventId !== null ? (int) $lastEventId : $since;

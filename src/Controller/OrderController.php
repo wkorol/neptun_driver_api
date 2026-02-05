@@ -194,11 +194,19 @@ class OrderController extends AbstractController
         if ($updateAll) {
             $orders = $this->orderRepository->all();
         }
-        $scheduledOrdersForToday = $this->orderRepository->findScheduledOrdersForToday();
-        $ordersForNext5Days = $this->orderRepository->findScheduledOrdersForNext5Days();
-        $actualOrders = $this->orderRepository->findActualOrders();
+        $scheduledOrdersForToday = $this->orderRepository->findScheduledOrdersForToday() ?? [];
+        $ordersForNext5Days = $this->orderRepository->findScheduledOrdersForNext5Days() ?? [];
+        $actualOrders = $this->orderRepository->findActualOrders() ?? [];
         if (!$orders) {
-            $orders = array_merge($scheduledOrdersForToday, $ordersForNext5Days, $actualOrders);
+            $orders = array_values(array_reduce(
+                array_merge($scheduledOrdersForToday, $ordersForNext5Days, $actualOrders),
+                static function (array $carry, Order $order): array {
+                    $carry[$order->getExternalId()] = $order;
+
+                    return $carry;
+                },
+                []
+            ));
         }
 
         $updatedCount = 0;

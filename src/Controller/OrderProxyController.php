@@ -143,6 +143,9 @@ class OrderProxyController extends AbstractController
     #[Route('/api/proxy/drivers/status', name: 'proxy_drivers_status')]
     public function getDriversStatus(MamTaxiClient $client): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return $this->json(['error' => 'Driver status fetching is temporarily disabled.'], 503);
+        }
         $client->refreshDriverStatuses();
 
         return $this->json([
@@ -153,6 +156,9 @@ class OrderProxyController extends AbstractController
     #[Route('/api/proxy/drivers/status/latest', name: 'proxy_drivers_status_latest')]
     public function latestDriverStatuses(MamTaxiClient $client): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return $this->json(['error' => 'Driver status fetching is temporarily disabled.'], 503);
+        }
         $data = $client->driverStatuses();
 
         return $this->json($data);
@@ -161,6 +167,9 @@ class OrderProxyController extends AbstractController
     #[Route('/fetch_statuses', name: 'statuses')]
     public function fetchDriverStatuses(MamTaxiClient $client): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return $this->json(['error' => 'Driver status fetching is temporarily disabled.'], 503);
+        }
         $data = $client->fetchDriverStatuses();
 
         return $this->json($data);

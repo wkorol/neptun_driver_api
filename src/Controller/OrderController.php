@@ -29,12 +29,16 @@ class OrderController extends AbstractController
         private DeleteAllFinishedOrdersHandler $deleteAllFinishedOrdersHandler,
         private OrderUpdatesTracker $updatesTracker,
         private OrderListTokenValidator $tokenValidator,
+        private bool $ordersFetchingDisabled,
     ) {
     }
 
     #[Route('/orders/scheduled/today', name: 'orders_scheduled', methods: ['GET'])]
     public function getScheduledOrdersForToday(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -45,6 +49,9 @@ class OrderController extends AbstractController
     #[Route('/orders/scheduled/next5days', name: 'orders_scheduled_next5days', methods: ['GET'])]
     public function getScheduledOrdersForNext5Days(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -55,6 +62,9 @@ class OrderController extends AbstractController
     #[Route('/orders/history/by-day', name: 'orders_history_by_day', methods: ['GET'])]
     public function getOrdersHistoryByDay(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -92,6 +102,9 @@ class OrderController extends AbstractController
     #[Route('/orders/find-by-phone', name: 'orders_find-by-phone', methods: ['GET'])]
     public function findOrdersByPhoneNumber(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -111,6 +124,9 @@ class OrderController extends AbstractController
     #[Route('/orders/find-history-batch', name: 'orders_find_history_batch', methods: ['POST'])]
     public function findHistoryBatch(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -140,6 +156,9 @@ class OrderController extends AbstractController
     #[Route('/orders/now', name: 'orders_actual', methods: ['GET'])]
     public function getActualOrders(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -150,6 +169,9 @@ class OrderController extends AbstractController
     #[Route('/orders/summary', name: 'orders_summary', methods: ['GET'])]
     public function getOrdersSummary(Request $request): JsonResponse
     {
+        if ($disabled = $this->denyIfOrdersFetchingDisabled()) {
+            return $disabled;
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }
@@ -164,6 +186,9 @@ class OrderController extends AbstractController
     #[Route('/orders/update/actual', name: 'update_all_existing_orders', methods: ['GET'])]
     public function updateAllExistingOrders(Request $request): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return new JsonResponse('Order fetching is temporarily disabled.', 503);
+        }
         $updateAll = $request->get('all', false);
         $orders = null;
         if ($updateAll) {
@@ -213,6 +238,15 @@ class OrderController extends AbstractController
         }
 
         return new JsonResponse("Updated {$updatedCount} orders");
+    }
+
+    private function denyIfOrdersFetchingDisabled(): ?JsonResponse
+    {
+        if (!$this->ordersFetchingDisabled) {
+            return null;
+        }
+
+        return new JsonResponse('Order fetching is temporarily disabled.', 503);
     }
 
     #[Route('/orders/delete-all-finished', name: 'delete_all_finished', methods: ['GET'])]

@@ -16,6 +16,7 @@ class OrderUpdatesController extends AbstractController
     public function __construct(
         private OrderUpdatesTracker $tracker,
         private OrderListTokenValidator $tokenValidator,
+        private bool $ordersFetchingDisabled,
     )
     {
     }
@@ -23,6 +24,11 @@ class OrderUpdatesController extends AbstractController
     #[Route('/api/orders/stream', name: 'orders_stream', methods: ['GET'])]
     public function streamOrders(Request $request): StreamedResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return new StreamedResponse(static function (): void {
+                echo 'Order updates disabled';
+            }, 503);
+        }
         if ($denied = $this->tokenValidator->denyUnlessValid($request)) {
             return new StreamedResponse(function () use ($denied): void {
                 $payload = $denied->getContent();

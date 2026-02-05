@@ -16,6 +16,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrderProxyController extends AbstractController
 {
+    public function __construct(
+        private bool $ordersFetchingDisabled,
+    ) {
+    }
     #[Route('/api/proxy/login', name: 'proxy_login')]
     public function login(Request $request, MamTaxiClient $client, OrderListTokenValidator $tokenValidator): JsonResponse
     {
@@ -33,6 +37,9 @@ class OrderProxyController extends AbstractController
     #[Route('/api/proxy/orders', name: 'proxy_orders')]
     public function getOrders(MamTaxiClient $client): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return $this->json(['error' => 'Order fetching is temporarily disabled.'], 503);
+        }
         if (!$client->isSessionValid()) {
             return $this->json(['error' => 'Session expired'], 401);
         }
@@ -45,6 +52,9 @@ class OrderProxyController extends AbstractController
     #[Route('/api/proxy/dump-orders', name: 'proxy_dump_orders')]
     public function dump(MamTaxiClient $client): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return $this->json(['error' => 'Order fetching is temporarily disabled.'], 503);
+        }
         $client->dumpAllOrdersToFiles();
 
         return $this->json(['message' => 'Zrzut zakończony']);
@@ -92,6 +102,9 @@ class OrderProxyController extends AbstractController
         OrderListTokenValidator $tokenValidator,
     ): JsonResponse
     {
+        if ($this->ordersFetchingDisabled) {
+            return new JsonResponse('Order fetching is temporarily disabled.', 503);
+        }
         if ($denied = $tokenValidator->denyUnlessValid($request)) {
             return $denied;
         }

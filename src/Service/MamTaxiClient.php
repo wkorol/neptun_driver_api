@@ -58,7 +58,7 @@ class MamTaxiClient
             'cookies' => $this->cookieJar,
             'allow_redirects' => true,
             'headers' => [
-                'User-Agent' => 'MamTaxiSymfonyProxy',
+                'User-Agent' => 'MamTaxi.pl',
                 'Accept' => 'application/json, text/html, */*',
             ],
         ]);

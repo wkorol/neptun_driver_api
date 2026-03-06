@@ -12,10 +12,8 @@ use Psr\Log\LoggerInterface;
 
 class TaximeterController extends AbstractController
 {
-    private const FLAG_FILE = 'var/price_update_flag.txt';
-    private const LAST_TRIGGER_FILE = 'var/price_update_last_trigger.txt';
-    private const TRIGGER_LOCK_FILE = 'var/price_update_trigger.lock';
-    private const DUPLICATE_WINDOW_SECONDS = 3;
+    private const QUEUE_FILE = 'var/price_update_queue.txt';
+    private const QUEUE_LOCK_FILE = 'var/price_update_queue.lock';
 
     public function __construct(private LoggerInterface $logger)
     {
@@ -24,27 +22,60 @@ class TaximeterController extends AbstractController
     #[Route('/api/price-update', name: 'price_update_check', methods: ['GET'])]
     public function checkPriceUpdate(): JsonResponse
     {
-        $flagPath = $this->getParameter('kernel.project_dir') . '/' . self::FLAG_FILE;
-
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $queuePath = $projectDir . '/' . self::QUEUE_FILE;
+        $lockPath = $projectDir . '/' . self::QUEUE_LOCK_FILE;
         $addPrice = false;
+        $queueCount = 0;
 
-        // Atomowe "przejęcie" flagi: tylko jeden request wygra rename
-        if (is_file($flagPath)) {
-            $consumedPath = $flagPath . '.consumed.' . bin2hex(random_bytes(6));
+        $lockHandle = @fopen($lockPath, 'c+');
+        if ($lockHandle === false || !flock($lockHandle, LOCK_EX)) {
+            if ($lockHandle !== false) {
+                fclose($lockHandle);
+            }
 
-            if (@rename($flagPath, $consumedPath)) {
-                $addPrice = true;
-                @unlink($consumedPath); // sprzątanie
+            $this->logger->error('Queue lock failed during check', [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'action' => 'queue_lock_check_failed',
+            ]);
 
-                $this->logger->info('Price update flag consumed (atomic)', [
-                    'timestamp' => date('Y-m-d H:i:s'),
-                    'action' => 'flag_consumed_atomic'
-                ]);
+            return $this->json([
+                'add_price' => false,
+                'queue_count' => 0,
+                'timestamp' => time(),
+                'status' => 'error',
+            ], 500)
+                ->setPrivate()
+                ->setMaxAge(0)
+                ->setSharedMaxAge(0);
+        }
+
+        if (is_file($queuePath)) {
+            $rawQueueCount = trim((string) @file_get_contents($queuePath));
+            if (ctype_digit($rawQueueCount)) {
+                $queueCount = (int) $rawQueueCount;
             }
         }
 
+        if ($queueCount > 0) {
+            $addPrice = true;
+            $queueCount--;
+
+            @file_put_contents($queuePath, (string) $queueCount, LOCK_EX);
+
+            $this->logger->info('Price update consumed from queue', [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'action' => 'queue_item_consumed',
+                'remaining_queue' => $queueCount,
+            ]);
+        }
+
+        flock($lockHandle, LOCK_UN);
+        fclose($lockHandle);
+
         return $this->json([
             'add_price' => $addPrice,
+            'queue_count' => $queueCount,
             'timestamp' => time(),
             'status' => 'success'
         ])
@@ -58,13 +89,12 @@ class TaximeterController extends AbstractController
     public function triggerPriceUpdate(Request $request): JsonResponse
     {
         $projectDir = $this->getParameter('kernel.project_dir');
-        $flagPath = $projectDir . '/' . self::FLAG_FILE;
-        $lastTriggerPath = $projectDir . '/' . self::LAST_TRIGGER_FILE;
-        $lockPath = $projectDir . '/' . self::TRIGGER_LOCK_FILE;
-        $flagDir = dirname($flagPath);
+        $queuePath = $projectDir . '/' . self::QUEUE_FILE;
+        $lockPath = $projectDir . '/' . self::QUEUE_LOCK_FILE;
+        $queueDir = dirname($queuePath);
 
-        if (!is_dir($flagDir)) {
-            mkdir($flagDir, 0755, true);
+        if (!is_dir($queueDir)) {
+            mkdir($queueDir, 0755, true);
         }
 
         $lockHandle = @fopen($lockPath, 'c+');
@@ -98,60 +128,23 @@ class TaximeterController extends AbstractController
             ], 500);
         }
 
-        $now = time();
-        $lastTriggerTimestamp = 0;
-
-        if (is_file($lastTriggerPath)) {
-            $lastTriggerRaw = trim((string) @file_get_contents($lastTriggerPath));
-            if (ctype_digit($lastTriggerRaw)) {
-                $lastTriggerTimestamp = (int) $lastTriggerRaw;
+        $queueCount = 0;
+        if (is_file($queuePath)) {
+            $rawQueueCount = trim((string) @file_get_contents($queuePath));
+            if (ctype_digit($rawQueueCount)) {
+                $queueCount = (int) $rawQueueCount;
             }
         }
 
-        $elapsed = $now - $lastTriggerTimestamp;
-        if ($lastTriggerTimestamp > 0 && $elapsed >= 0 && $elapsed < self::DUPLICATE_WINDOW_SECONDS) {
-            flock($lockHandle, LOCK_UN);
-            fclose($lockHandle);
+        $queueCount++;
+        @file_put_contents($queuePath, (string) $queueCount, LOCK_EX);
 
-            $this->logger->info('Price update trigger ignored (duplicate window)', [
-                'timestamp' => date('Y-m-d H:i:s'),
-                'action' => 'trigger_duplicate_ignored',
-                'ip' => $request->getClientIp(),
-                'elapsed_seconds' => $elapsed,
-            ]);
-
-            return $this->json([
-                'success' => true,
-                'message' => 'duplicate_ignored',
-                'accepted' => false,
-                'timestamp' => $now,
-            ]);
-        }
-
-        @file_put_contents($lastTriggerPath, (string) $now, LOCK_EX);
-
-        $flagCreated = false;
-
-        // ✅ nie nadpisuj jeśli już jest ustawiona (idempotent)
-        $flagHandle = @fopen($flagPath, 'x');
-        if ($flagHandle !== false) {
-            fwrite($flagHandle, date('Y-m-d H:i:s'));
-            fclose($flagHandle);
-
-            $flagCreated = true;
-
-            $this->logger->info('Price update flag set', [
-                'timestamp' => date('Y-m-d H:i:s'),
-                'action' => 'flag_created',
-                'ip' => $request->getClientIp(),
-            ]);
-        } else {
-            $this->logger->info('Price update flag already exists (ignored)', [
-                'timestamp' => date('Y-m-d H:i:s'),
-                'action' => 'flag_exists_ignored',
-                'ip' => $request->getClientIp(),
-            ]);
-        }
+        $this->logger->info('Price update queued', [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'action' => 'queue_item_added',
+            'ip' => $request->getClientIp(),
+            'queue_count' => $queueCount,
+        ]);
 
         flock($lockHandle, LOCK_UN);
         fclose($lockHandle);
@@ -159,25 +152,40 @@ class TaximeterController extends AbstractController
         return $this->json([
             'success' => true,
             'message' => 'ok',
-            'accepted' => $flagCreated,
-            'timestamp' => $now,
+            'accepted' => true,
+            'queue_count' => $queueCount,
+            'timestamp' => time(),
         ]);
     }
 
     #[Route('/api/price-update/status', name: 'price_update_status', methods: ['GET'])]
     public function getPriceUpdateStatus(): JsonResponse
     {
-        $flagPath = $this->getParameter('kernel.project_dir') . '/' . self::FLAG_FILE;
-        $flagExists = file_exists($flagPath);
-        $flagContent = null;
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $queuePath = $projectDir . '/' . self::QUEUE_FILE;
+        $lockPath = $projectDir . '/' . self::QUEUE_LOCK_FILE;
+        $queueCount = 0;
 
-        if ($flagExists) {
-            $flagContent = file_get_contents($flagPath);
+        $lockHandle = @fopen($lockPath, 'c+');
+        if ($lockHandle !== false && flock($lockHandle, LOCK_SH)) {
+            if (is_file($queuePath)) {
+                $rawQueueCount = trim((string) @file_get_contents($queuePath));
+                if (ctype_digit($rawQueueCount)) {
+                    $queueCount = (int) $rawQueueCount;
+                }
+            }
+
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        } elseif ($lockHandle !== false) {
+            fclose($lockHandle);
         }
 
         return $this->json([
-            'flag_exists' => $flagExists,
-            'flag_created_at' => $flagContent,
+            'flag_exists' => $queueCount > 0, // compatibility
+            'flag_created_at' => null, // compatibility
+            'queue_count' => $queueCount,
+            'has_pending_updates' => $queueCount > 0,
             'timestamp' => time()
         ]);
     }

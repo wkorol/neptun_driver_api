@@ -1,5 +1,5 @@
 * * * * * /usr/local/bin/php /var/www/html/bin/console app:update-lump-sums >> /var/log/cron.log 2>&1
 
-# Local-only cron targets (import runs via dev loop in container)
-* * * * * curl -s -X GET http://localhost:8000/orders/update/actual >> /var/log/cron_mamtaxi_updatescheduled.log 2>&1
-* * * * * curl -s -X GET http://localhost:8000/api/proxy/drivers/status >> /var/log/cron_mamtaxi.log 2>&1
+# Local-only cron targets (import runs via loop in container)
+* * * * * curl -fsS --max-time 30 -X GET http://127.0.0.1/orders/update/actual >> /var/log/cron_mamtaxi_updatescheduled.log 2>&1
+* * * * * curl -fsS --max-time 30 -X GET http://127.0.0.1/api/proxy/drivers/status >> /var/log/cron_mamtaxi.log 2>&1
